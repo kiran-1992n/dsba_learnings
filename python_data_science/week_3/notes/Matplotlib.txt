@@ -1,0 +1,135 @@
+from matplotlib import pyplot as plt
+
+x=np.arange(1,11)
+y1=2*x
+y2=3*x
+
+1) Line Plot:
+
+	Basic Line Plot:
+
+		plt.plot(x,y1)
+		plt.show()
+
+	Setting other parameters to give additional Info:
+
+		# having 2 line plots in single plot.
+		plt.plot(x,y1,color='g',linestyle=':',linewidth=2)    # Plotting graph by specifying linewidth,linestyle, color
+		plt.plot(x,y2,color='r',linestyle='-.',linewidth=3)
+		plt.title("Line Plot")
+		plt.xlabel("x-axis")
+		plt.ylabel("y-axis")
+		plt.grid(True)
+		plt.show()
+		
+	Subplots:
+
+		# 1 row 2 columns
+		plt.subplot(1,2,1)
+		plt.plot(x,y1,color='g',linestyle=':',linewidth=2)
+		
+		plt.subplot(1,2,2)
+		plt.plot(x,y2,color='r',linestyle='-.',linewidth=3)
+		
+		plt.show()
+		
+2) Scatter Plot:
+
+x = np.arange(10,101,10)
+y = [8,3,9,4,1,5,2,0,7,6]
+y1 = [0,1,2,9,8,3,4,7,6,5]
+
+	Basic Scatter Plot:
+		
+		plt.scatter(x,y)
+		plt.show()
+	
+	Setting other parameters to give additional Info:
+	
+		# having 2 scatter plots in single plot.
+		plt.scatter(x,y,c="red",marker="*", s =100) # Setting color, marker, size of marker
+		plt.scatter(x,y1,c="green",marker=".", s =200)
+		plt.title("Scatter Plot")
+		plt.xlabel("x-axis")
+		plt.ylabel("y-axis")
+		plt.grid(True)
+		plt.show()
+		
+3) Bar Plot: 
+		For Catagorical columns.
+		
+		Basic bar plot: Vertial Bar
+		
+			emp = {'ki': 29, 'kee': 31, 'Arch': 26}
+			names =  list(emp.keys())
+			val = list(emp.values())
+			
+			plt.bar(names,val)
+			plt.show()
+			
+		Horizontal Bar Plot:
+		
+			plt.barh(names,val, c = 'green')
+			plt.title("Bar Plot")
+			plt.xlabel("x-axis")
+			plt.ylabel("y-axis")
+			plt.grid(True)
+			plt.show()
+			
+4) Histogram:
+
+		Basic Histogram:
+		
+			data = [1,3,3,3,3,9,9,5,4,4,8,8,8,6,7]
+			plt.hist(data)
+			plt.show()
+			
+		
+			iris = pd.read_csv('iris.csv')
+			plt.hist(iris['Sepal.Length'],bins=30,color="r") # can specify number of bins the data to be distributed.
+			
+5) Box & Violin Plot:
+
+	one = [1,2,3,4,5,6,7,8,9]
+	two = [1,2,3,4,5,4,3,2,1]
+	three = [6,7,8,9,8,7,6,5,4]
+
+	data =  list([one,two,three])
+	plt.boxplot(data)
+	plt.show()
+	
+	# Similarly
+	plt.violinplot(data, showmedians=True)
+	plt.show()
+	
+6)Pie Chart & Doughnut chart:
+
+	fruit = ['Apple','Orange','Mango','Guava']
+	quantity = [67,34,100,29]
+	
+	plt.pie(quantity, labels = fruit)
+	plt.show()
+	
+	# To add percentages
+	plt.pie(quantity, labels = fruit, autopct='%0.1f%%', colors = ['red', 'blue','green','yellow']) # 1 means one digit after decimal point
+	plt.show()
+	
+	# Similarly
+	plt.pie(quantity, labels = fruit, radius = 2)
+	plt.pie([1], colors = ['w'], radius = 1)
+	plt.show()
+	
+
+	
+			
+		
+		
+		
+			
+		
+			
+	
+		
+		
+		
+	

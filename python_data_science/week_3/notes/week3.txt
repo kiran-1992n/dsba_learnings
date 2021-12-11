@@ -1,0 +1,40 @@
+Visualization - Making Graphs
+
+Three important Libraries:
+	Matplotlib - Basic graphs. Subpackage used is pyplot(present within matplotlib)
+	Seaborn - Used on top of Matplotlib to give better textures and so on...
+	Plotly -  Build interactive graphs.(Commercial)
+	
+Continuous Variable Plots:
+
+	Continuous Variables : Continuous variables are numeric variables that have an infinite number of values between any two values. 
+	                       A continuous variable can be numeric or date/time. eg. Price, Sales, Distance, etc.
+ 	                       
+	1) Histogram --> sns.distplot() for 1-D plot takes 1 pandas series as inp.
+	2) ScatterPlot --> sns.jointplot() for 2-D plot  takes 2 pandas series as inp.
+	3) sns.pairplot for 2-D plot takes 1 pandas DF as inp. each colmn in DF is plotted against remaining colmns of DF.
+	   Also each induvisual columns histogram will be present.
+	   
+Categorical and Continuous Variable Plots:
+
+	Categorical variables : Categorical variables contain a finite number of categories or distinct groups. eg. Gender, Marital Status, etc.
+	
+	1) ScatterPlot --> sns.stripplot() for 2-D plot takes 2 pandas series as inp where 1 of the series is a Categorical Variable.
+					   Here scatterponts overlap.
+					   {jitter = True spreads the ponts , jitter = False places all points on one single line.}
+	2) ScatterPlot --> sns.swarmplot() for 2-D plot takes 2 pandas series as inp where 1 of the series is a Categorical Variable.
+					   Positions each scatterplot point on the categorical axis and avoids overlapping points.
+	3) BoxPlot -->     sns.boxplot() for 2-D plot takes 2 pandas series as inp where 1 of the series is a Categorical Variable.
+					   This kind of plot shows the three quartile values of the distribution along with extreme values.
+					   Additional panda series can be passed as with argument 'hue' to get additional graph on same plot.
+	4) Bar Chart -->   sns.barplot() for 2-D plot takes 2 pandas series as inp where 1 of the series is a Categorical Variable.
+					   Additional panda series can be passed as with argument 'hue' to get additional graph on same plot.
+	5) Histogram -->   sns.countplot() for 1-D plot takes 1 pandas series as inp which is a Categorical Variable.
+					   Additional panda series can be passed as with argument 'hue' to get additional graph on same plot.
+	6) Pointplot -->   sns.pointplot() for 2-D plot takes 2 pandas series as inp where 1 of the series is a Categorical Variable.
+					   Additional panda series can be passed as with argument 'hue' to get additional graph on same plot.
+	7) Catagorical --> sns.catplot()
+	
+	Linear Regression Model : 
+		sns.lmplot()for 2-D plot takes 2 pandas series as inp gives line of best fit with scatterplot.
+		Additional panda series can be passed as with argument 'hue' to get additional graph on same plot.
