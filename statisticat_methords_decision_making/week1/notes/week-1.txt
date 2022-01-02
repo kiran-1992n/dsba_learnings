@@ -1,0 +1,158 @@
+Statistics : Methods that are adapted/chosen to 
+	- Explain the data.
+	- Understand the data.
+	- Interpreting the data.
+	
+Data can be both qualitative & Quantitative.
+
+2 kinds of analytics is done:
+
+	1)Goal and Objective of Analytics is defined, then data is gathered through surveys (online/offline) then analyzed & interpreted.
+	2)Large amount of data is available and then patterns & trends are discovered from it and used for business development.
+	
+If a dataset can challenge the available computing power both in terms of H/W & S/W it is big data.
+
+Four Pillars of Business Analytics:
+
+	- Descriptive Analytics  --> What do the numbers say.
+	- Diagonistic Analytics  --> Why the numbers look the way they are.
+	- Predictive Analytics   --> Predict or forecast something.
+	- Prescriptive Analytics --> Decision Making.
+	
+
+Descriptive Analytics:
+
+	What do numbers say - summary measures : central tendency, averages, mean, std deviation, histogram, box plots, scatter diagrams etc.
+	
+
+Data versus Information:
+
+	Data is the raw material & Information is finished product. 
+	
+Frequency Distribution:
+
+	- Histogram.
+	- Raw data is classified into different classes, Tabular Representation of class and the freq of raw data in that class is called frequency Distribution.
+	- Histogram is a graphical representation of frequency distribution in which X-axis represent classes & Y-axis represent frequencies in bars.
+	- Histogram is a pattern recognition tool that describes the shape of the distribution and its associated properties.
+	
+Central Tendancy / Statistical Average :
+
+	Arithmetic Mean : 
+	
+		- Sum of all observations in a dataset divided by the total number of observations.
+		- **Extremely high or extremely low values in dataset are outliers. When outliers are present Arithmetic mean is not reliable measure.
+		- Ex-1 [565,570,572,568,585] --> Arithmetic mean is 572, reliable
+		- Ex-2 [10,570,572,568,585] --> Arithmetic mean is 461, not reliable, here 10 is outlier.
+		- Can combine induvisual Mean's of different datasets.
+		
+	Median:
+	
+		- Median is the middle most observations when data is arranged in ascending(descending can also be used) order of magnitude.
+		- Median is such that 50% of observations are above median & 50% of observations are below median. 
+		- It has greater resistance to outliers when compared to mean.
+		- Cannot combine induvisual Median's of different datasets.
+		
+	Mode:
+	
+		- It is that value which occurs most often.
+		- It also has resistance to outliers.
+		- **In few scenarios there will be more than one mode, bimodal, multimodal here we can't have unique mode value.
+		- Cannot combine induvisual Mode's of different datasets.
+		
+Measures of Dispersion:
+
+	Range:
+	
+		- It is calculated as diff b/w man & min value in dataset.
+		- **If max value or min value is a outlier, range should not be used.
+		
+	Inter Quartile Range (IQR):
+	
+		- Range computed on middle 50% of observations, after eliminating highest & lowest 25% of observations in dataset that is arranged in ascending order.
+		- IQR is less affected by outliers.
+		- IQR = Q3 - Q1
+		
+	Standard Deviation:
+	
+		- It is the square root of variance.
+		
+		- Steps to find variance:
+		
+			- Find Arithmetic mean of given dataset
+			- Find the square of  difference between mean & each observation.
+			- Sum up each resulting values value of above step.
+			- Divide the final sum by (n-1) where n is number of observations.
+			- Resulting value is Variance.
+			
+		- Std Deviation is measure of Risk & Volatility(w.r.t Stock Mkt)
+		
+	Coefficient of Variation:
+	
+		- Ratio of Std Deviation to mean.
+		
+Empirical Rule:
+
+	In a bell curve :
+		- 68% of data points lies between mean(mu) + std deviation(sigma) and mean(mu) - std deviation(sigma)
+		- 95% of data points lies between mean(mu) + 2*std deviation(sigma) and mean(mu) - 2*std deviation(sigma)
+		- 99.7% of data points lies between mean(mu) + 3*std deviation(sigma) and mean(mu) - 3*std deviation(sigma)
+
+The Five Number Summary:
+
+	- min
+	- First Quartile (Q1)
+	- Median(Q2)
+	- Third Quartile (Q3)
+	- max
+	
+	Box-Plot:
+	
+		- A Graphical display of the data based on the Five Number Summary.
+		- IQR = Q3 -Q1
+		- lower limit = Q1 - 1.5(IQR)
+		- upper limit = Q3 + 1.5(IQR)
+		- If observation is beyond lower & upper limitthen it is considered as an outlier.
+
+-----------------------------------------------------------------------------------------------------------------
+Cross Tabulation:
+
+	- pd.crosstab(<pandas_series_required_on_rows>, <pandas_series_required_on_colmns>)
+	- Ex: pd.crosstab(pd['Product'], pd['MaritalStatus'])
+	- used to compute a simple cross-tabulation of two (or more) factors.
+	
+Pivot Table:
+
+	- create a spreadsheet-style pivot table as a DataFrame.
+	- Ex: pd.pivot_table(mydata, index=['Product', 'Gender'], columns=[ 'MaritalStatus'], aggfunc=len) # Just getiing the count.
+	- Ex: pd.pivot_table(mydata,'Income', index=['Product', 'Gender'], columns=[ 'MaritalStatus']) # Now men value is obtained for each pivoted section.
+	
+Correlation:
+
+	- used to find the pairwise correlation of all columns in the dataframe.
+	- cor = df.corr()
+	- sns.heatmap(cor,annot=True) # Seaborn Heat Map to display correlation.
+
+-----------------------------------------------------------------------------------------------------------------
+Rohith Sharma has:
+		- Batting Averege - 47
+		- Std Deviation - 30 (More or less he would score it)
+		- Scoring Range - 17-77(avg-std deviation to avg+std deviation )
+		
+Shikar Dhavan has:
+		- Batting Averege - 45
+		- Std Deviation - 15
+		- Scoring Range - 30-60
+		
+** Since Std Deviation for Shikar is less he is consistent. 
+-----------------------------------------------------------------------------------------------------------------
+Observations:
+
+	- If the Skewness is almost '0' it means Data is Evenly Distributed.And It almost fits as a bell curve.
+	- From the Histogram, we can infer which side the tail is extending and that tells data is left/Right Skewed.
+	- From the box plot, which side of box is extended compared to other and that tells data is left/Right Skewed.
+	
+	- Correlation values ranges between 1 & -1
+	- Positive correlation means directly proportional(if 1 variable increases other variable also increases.) +1 is max correlation value.
+	- Negative correlation means inversely proportional (if 1 variable increases other variable also decreases.) -1 is max correlation value.
+	- If the value is 0 or near to 0 it means no correlation between these 2 variables.
