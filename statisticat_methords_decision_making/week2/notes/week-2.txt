@@ -99,9 +99,9 @@ Marginal Probability:
 		soln: we need to find P(CD|AC) 
 		
 		Attributs		CD		noCD		Marginal-Total
-		AC				*20		50			*70
+		AC			*20		50			*70
 		noAC			20		10			30
-		Marginal-Total  *40		60			100
+		Marginal-Total  	*40		60			100
 		
 		In the above table values starting with * are given. Using these values other values are calculated.
 		
@@ -131,7 +131,7 @@ Bayes' Theoram:
 		We have ->  Probability of Detailed Tests given Successful wells.
 		We need ->  Probability of successful wells/operation given Detailed Test.
 		
-		Attributes			Successful		Un-Successful	Marginal-Total
+		Attributes		Successful		Un-Successful			Marginal-Total
 		DetailedTest		*24				*12				36
 		No-DetailedTest 	16				48				64
 		Marginal-Total		*40				60				100
