@@ -1,0 +1,265 @@
+Numpy:
+
+	Numpy Array Creations:
+
+		1-D Creation:
+			n1=np.array([10,20,30,40])
+			
+		2-D creation:
+			n2=np.array([[10,20,30,40],[40,30,20,10]])
+			
+		M * N array with 0's :
+			M -> rows & N  -> colmns
+			n1=np.zeros((1,2))
+
+		M * N array with specific value:
+			M -> rows & N  -> colmns	
+			n1=np.full((2,2),10) # 10 is specific value here.
+		
+		Initializing Numpy Array with a range:
+		
+			i)  n1=np.arange(10,20) # Array has values starting from 10 and continues till 20(excluding 20 i.e 10 to 19)
+			ii) n1=np.arange(10,50,5) # Array has values starting from 10 and continues till 50 (excluding 50) with a stepsize of 5. 10,15,...45
+			
+		Initializing Numpy Array with a random Numbers:
+		
+			i) n1=np.random.randint(1,100,5) # array of '5' elements, Whose values is between '1' & '100'
+		
+	Shape:
+		i)  n2=np.array([[10,20,30,40],[40,30,20,10]])
+		    n2.shape # o/p is (2,4)
+		   
+		ii) n1=np.array([10,20,30,40])
+		    n2.shape # o/p is (1,4)
+			
+		can change shape of existing array as so:
+			n2.shape = (4,2)
+			
+	Joining NumPy Arrays:
+	
+		n1=np.array([10,20,30])
+		n2=np.array([40,50,60])
+		
+		i)  vstack() : Vertical Join
+				Shape gets added at row level i.e (1,3) added with (1,3) gives (2,3)
+				np.vstack((n1,n2)) # array([[10, 20, 30],[40, 50, 60]])
+			
+		ii) hstack() : Horizontal Join
+				Shape gets added at colmn level i.e (1,3) added with (1,3) gives (1,6)
+				np.hstack((n1,n2)) # array([10, 20, 30, 40, 50, 60])
+				
+		iii)column_stack() : 
+				Shape gets changed. Row in 1 array becomes colmn of Result
+				np.column_stack((n1,n2)) # array([[10, 40],[20, 50],[30, 60]])
+				
+	Intersection & Difference:
+	
+		n1=np.array([10,20,30,40,50,60])
+		n2=np.array([50,60,70,80,90])
+		
+		i)	Intersection: Common elements	
+				np.intersect1d(n1,n2) # array([50, 60])
+			
+		ii)	Difference: Present in 1 array and not present in othere array
+				np.setdiff1d(n1,n2) # array([10, 20, 30, 40]) Elements present in n1 and not in n2
+				np.setdiff1d(n2,n1) # array([70, 70, 90]) Elements present in n2 and not in n1
+				
+	Addition Of Numpy Arrays:
+	
+		n1=np.array([10,20])
+		n2=np.array([30,40])
+		
+		i)	Sum: 
+				np.sum([n1,n2]) # 100
+			
+		ii)	Column Wise Sum:
+				np.sum([n1,n2],axis=0) # array([40, 60])
+		
+		iii)Row Wise Sum:
+				np.sum([n1,n2],axis=1) # array([30, 70])
+				
+	Scalar Operations on Numpy Arrays:
+	
+		n1=np.array([10,20,30])
+		
+		1)	Add:
+				n1 = n1 + 2 # array([12,22,32])
+				
+		2)	Subtract:
+				n1 = n1 - 2 # array([8,18,28])
+		
+		3)	Multiply :
+				n1 = n1 * 2 # array([20,40,60])
+				
+		4)	Divide :
+				n1 = n1 / 2 # array([5.,10.,15.])
+				
+	Statistical Operations:
+	
+		Standard Deviation :
+			
+			n1=np.array([1,5,3,100,4,48])
+			np.std(n1) # 36.59424666377065
+			
+		Mean :
+		
+			n1= np.array([10,20,30,40,50,60])
+			np.mean(n1) # 35.0
+			
+		Median :
+			
+			n1= np.array([1,3,5,7,9,11])
+			np.median(n1) # 6.0
+		
+	Save & Load Numpy:
+	
+		n1 = np.array([10,20,30,40,50,60])
+		np.save('kiran', n1)
+		
+		n2 = np.load('kiran.npy')
+		
+############################################################################################################################################
+
+Pandas:
+
+	Pandas Series:
+
+		Series Object is a 1-D Labelled Array.
+			s1 = pd.Series([1,2,3,4,5]) 
+			
+		Creation of Pandas series using dict:
+			s1 = pd.Series({'a': 1, 'b': 2})
+			
+		Default indexing starts from 0 and it goes on. In above example '1' has index 0 & '5' has index 4.
+		
+		Changing the index values:
+			s1 = pd.Series([1,2,3,4,5],index=['a','b','c','d','e'])
+			
+			s2 = pd.Series({'a':10,'b':20,'c':30},index=['b','c','d','a']) # here index 'd' is not present in given dict so it take 'NaN' value
+			
+		Accessing Elements in Series is similar to acessing elements in list.
+		
+			s1[3]   -> Element at 3rd Index 
+			s1[:4]  -> All slement from starting till 4th index excluding 4th index
+			s1[-3:] -> 3 Elements from last index
+			
+		Scalar Operations :
+			s1 = s1 + 5 --> Similarly Sub, Mul & Div
+			
+		Addind 2 series (Respective element addition):
+			s = s1 + s2 --> Similarly Sub, Mul & Div
+			
+	Pandas DataFrames:
+	
+		df1 = pd.DataFrame({'name': ['kiran', 'kee', 'arch', 'rash'], 
+							'age': [29,31,26,29], 
+							'organisation': ['tcs','amadeus','citrix','l&T'], 
+							'salary': [10,22,17,8],
+							'loan': [1, 3, 0, 40],
+							'food': ['dosa', 'idli', 'dosa', 'idli']})
+		# Here 'name' & 'age' are colmn headers. And lenght of lists become number of rows.
+		
+		head() -> Get first 5 rows of dataframe.
+			df1.head()
+			
+		tail() -> Get last 5 rows of dataframe.
+			df1.tail()
+			
+		shape() -> gives info about num of rows & num of colms.
+			df1.shape() # output will be (m,n) m-> num of rows , n -> num of colmns
+			
+		describe() -> Provides Statistical summary of data frame. Like mean, min, max, std and few more. 
+			df1.describe() 
+		
+		iloc -> extract required rows & colmn from a DF.
+			df1.iloc[0:2,1:3] # Get rows starting from '0' upto '2'(excluding row '2') & colmns starting from '1' upto '3' (excluding colmn '3')
+			
+		loc -> extract required rows & specified colmns from a DF.
+			df1.loc[0:2,('name','organisation')] # Get rows starting from '0' upto '2'(excluding row '2') & colmns 'name' & 'organisation'
+			
+		drop() -> For dropping rows & columns from DF.
+			df1.drop('age', axis = 1) # Drop complete colmn of 'age' from DF.
+			df1.drop([1,2], axis = 0) # Drop complete rows with index '1' & '2' from DF. 
+			
+	Statistical Operations:
+	
+		Following functions gives respective values of all (numeric) columns of DF.
+		
+			df1.mean()
+			df1.median()
+			df1.min()
+			df1.max()
+			df1.std()
+			
+	DataFrame Functions:
+			
+		apply() -> Function to apply logic on required colmns. 
+		
+			def half(s):
+				return 0.5*s
+				
+			df1[['age', 'loan']].apply(half)
+			
+	value_counts() -> Gives the num of ocurrances of each value in given colmn 
+	
+		df1['food'].value_counts() 
+		# Output
+		# idli 2
+		# dosa 2
+		
+	sort_values() -> Sorts the DF w.r.t values of specified colmn
+		
+		df1.sort_values(by = 'salary')
+		
+############################################################################################################################################
+
+Statistics:
+
+	Statistics Methords:
+		1)Classification
+		2)Pattern Recognition
+		3)Association
+		4)Predictive Modeling
+		
+	Types of Statistics:
+		1)Descriptive Statistics - what has already happened.
+		Ex Player 'X' has won total 'Y' championships till date.
+		2)Inference Statistics - what may hppen or what might have happened, trying to draw conclusions.
+		Ex What are the chances Player 'X' will win next championship.
+		
+	Terminologies used:
+	
+		Population : Is the universe of possible data for a specified object.
+			Ex: People who have visited or will visit the website.
+		
+		Parameter : Is a numerical value associated with the population.
+			Ex: Avg amount of time people spend on website.
+		
+		Sample : Is a selection of observations from a population.
+			Ex : People (or IP addresses) who visited a website on a specific day.
+		
+		Statistic : Is a numerical value associated with an observed sample.
+			Ex : Avg amount of time people spend on website on a specific day.
+
+	Data Sources:
+	
+		Primary Data: Are collected by organisation itself for a particular purpose.They fit the needs exactly, are upto date and reliable.
+		
+		Secondary Data:Are collected by other organisations for other purposes. They may be published by other organisations, available from research studies, published by govt, web, social Media and so on.
+
+	Types Of Data:
+		
+		Qualitative Data: Non-numeric in nature and can't be measured. Ex: Gender, Religion, Place of Birth
+		
+		Quantitative Data: Numerical in nature and can be measured. Ex: Balance in SB account, Number of members in Family.
+		
+		- Quantitative data can be classified into discrete Type and Continuous Type.
+		
+	------------------------------------------------------------------------------------
+	
+	Data Objects:
+	
+		- Data Sets are made up of data objects.
+		- A data object represents an entity.
+		- Data Objects are described by attributes.
+		- DB rows -> data objects, DB colmns -> attributes

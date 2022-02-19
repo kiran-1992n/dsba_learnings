@@ -35,6 +35,7 @@ Hypothesis Basics:
 		- What you intutively feel is the truth, is the alternate hypothesis -> what you wish to prove.
 		- The null hypothesis is formulated such that the rejection of the null hypothesis proves the alternate hypothesis is true.
 		- "Null Hypothesis is always tested at equality"
+		** We can't have equal sign for Alternate Hypothesis.
 
 		Ex : I know Peter always speaks truth. But I cant prove it.
 		
@@ -57,6 +58,10 @@ Hypothesis Basics:
 		. Alpha -> Level of Significance of Test
 		.(1 - Alpha) -> level of Confidence of test
 		.(1 - Beta) -> Power of the test, how clear is the demarkation b/w null & alternate hypothesis.
+		
+-> Only null hypothesis can have equality sign
+-> Alternate cannot have equality sign
+-> Null & alternate should be mutually exclusive
 		
 ----------------------------------------------------------------------		
 		
@@ -99,14 +104,16 @@ Case Study - Hypothesis Testing:
 				. With mean 'mu'(29K) And standard deviation (sigma/root n)
 				. When nothing is metioned alpha is taken as 5%. 
 				
-				. For this value of alpha 'x' value comes out to be 29.658K and 'z' as 1.645
+				. For this value of alpha, 'x' value comes out to be 29.658K and 'z' as 1.645
+				
+					** Since Excel gives Cumilative Probability and alpha of 5% (Right Tailed test.) means take 1 - 0.05 = 0.95 as Cumilative probability in Excel Computation.
+					If it was a negative tail or left tail we need to put 0.05.
+					. Excel function --> Norm.s.inv(0.95) gives 1.645, this is the critical value of z.
+					. To find critical x-bar value Use , z = (x-bar - mu)/ (sigma/root n) given z = 1.645, sigma = 8K, n = 400 this give critical x-bar value as 29.658K.
+				
 				. Meaning of above line is 'x' & 'z' values less than above mentined critical values "DO NOT REJECT NULL HYPOTHESIS"
 				. If 'x' & 'z' values are more than above mentined critical values "REJECT NULL HYPOTHESIS"
 				
-				** Since Excel gives Cumilative Probability and alpha of 5% (Right Tailed test.) means take 1 - 0.05 = 0.95 as Cumilative probability in Excel Computation.
-				If it was a negative tail or left tail we need to put 0.05.
-				. Excel function --> Norm.s.inv(0.95) gives 1.645, this is the critical value of z.
-				. To find critical x-bar value Use , z = (x-bar - mu)/ (sigma/root n) given z = 1.645, sigma = 8K, n = 400 this give critical x-bar value as 29.658K.
 				
 				. In our case z = 2.5 and falls in rejection region which is greater than critical 'z' value 1.645 so we can "REJECT NULL HYPOTHESIS"
 				. The new product line can be released to current mkt with 95% cofidence level.
@@ -495,3 +502,5 @@ Chi-Square Test Handson:
 	
 	chi2, pval, dof, exp_freq = chi2_contingency(df, correction = False)
 	# compare p-value with alpha & take decision
+	
+----------------------------------------------------------------------

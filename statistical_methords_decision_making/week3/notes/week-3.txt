@@ -1,0 +1,507 @@
+Prelimnaries:
+
+	- Say we have a population of 1 lakh +.
+	- We have taken a sample size (n) of 150 customers.
+	- We have computed samle mean (x-bar) income as 8 LPA.
+	- Sample Error : Diff between samle mean income and the actual income.
+	- Assumption : Sample estimate will be reflective of reality.
+	- In the same way take few more samples and compute mean (x-bar) of each sample.
+	- Several means can be calculated for different samples.
+	- Distribution of these means is called sampling disribution of the sample mean.
+	
+	Ex : Consider a class of 60 studants. Assume marks obtained by studants follow "Normal Distribution".
+		 with mean of 70 and Std Deviation of 4. Now suppose we take multiple samples and compute mean of each samples, this Sampling Distribution of 
+		 sample means also follow "Normal Distribution" with the same mean 'mu' and with the std deviation (sigma/root(n)) 'n' being the sample size.
+		 This (sigma/root(n)) is called "Standard Error"
+		 
+	Suppose the origial data (marks obtained by studants) don't follow "Normal Distribution" / Bell Curve, all our previous analysis will go vain.
+	
+Central Limit Theoram:
+
+	Irrespective of the shape of the distribution of the original population, the sampling distribution of the mean will approach a normal 
+	distribution as the size of the sample increases and becomes large. 
+	[Thumb rule says large means n >= 30]
+
+----------------------------------------------------------------------
+
+Hypothesis Basics:
+
+	- A hypothesis is a conjecture, an assumption or a statement which may or may not be true.
+	- A statistical hypothesis is a statement about a population parameter. It may or may not be true.
+	  The manager has to ascertain the truth of the hypothesis. 
+	
+	Null & Alternate Hypothesis:
+	
+		- What you intutively feel is the truth, is the alternate hypothesis -> what you wish to prove.
+		- The null hypothesis is formulated such that the rejection of the null hypothesis proves the alternate hypothesis is true.
+		- "Null Hypothesis is always tested at equality"
+		** We can't have equal sign for Alternate Hypothesis.
+
+		Ex : I know Peter always speaks truth. But I cant prove it.
+		
+			So Formulate Null hypothesis : Peter is a Liar
+			Alternate hypothesis : Peter speaks the truth.
+			
+		"The Null Hypothesis is formulated such that the rejection of the null hypothesis proves the alternate hypothesis is true."
+		
+					True		False
+		
+		Reject		Type-1		No Error
+					(alpha)
+		
+		Accept		No Error	Type-2
+								(Beta)
+								
+		. Alpha is the probability of rejecting the null hypothesis when it is true.
+		. Beta is the probability of accepting the null hypothesis when it is false.
+		.(1 - alpha ) is the probability of accepting the null hypothesis when it is true.
+		. Alpha -> Level of Significance of Test
+		.(1 - Alpha) -> level of Confidence of test
+		.(1 - Beta) -> Power of the test, how clear is the demarkation b/w null & alternate hypothesis.
+		. Alpha + Beta is not equal to 1.
+		
+-> Only null hypothesis can have equality sign
+-> Alternate cannot have equality sign
+-> Null & alternate should be mutually exclusive
+		
+----------------------------------------------------------------------		
+		
+Case Study - Hypothesis Testing:
+
+	Problem : A product manager belives a new product line launch will be dequately profitable only in mkts where mean household income is greater than 29K.
+			  Survey of random sample of 400 households in the mkt showed a mean income per household of 30K with Std deviation of 8K.
+			  Should the product manager release the new product line?
+			  
+		- To reach a final decision, product manager has to make a generalinference (about the population) from the sample data
+		- Criterion-- mean income across across all households in the market area under consideration
+		- If the mean population household income is greater than 29K, product manager should introduce the product line into the new market
+		- Decision making is equivalent to either accepting or rejecting the hypothesis.
+		
+		One Tailed Test:
+		
+			The term one-tailed signifies that all -ve or z-values that would cause PM's to reject H0, are in just one tail of the sampling distribution.
+			
+			µ = Population Mean
+			H0: µ = 29K --> Null Hypothesis
+			Ha: µ > 29K --> Alternate Hypothesis
+			
+			The Alternate hypothesis indicates a direction - here it is right of the mean.
+			One - tailed test on the +ve side - Right Tailed test.
+			Alternate hypothesis will never have '=' sign.
+			
+			Test statistic:
+			
+				z = (x-bar - mu)/ (sigma/root n)
+				
+				x-bar -> Estimate - 30K
+				mu -> Population mean hypothesized - 29K
+				sigma -> Population std deviation - 8K
+				n -> Size of Sample - 400
+				
+				z =2.5
+				
+				. It is not mentioned about the type of distribution.
+				. Applying Central Limit Theoram since n is large (n>30) distribution of x-bar is Normal Distribution.
+				. With mean 'mu'(29K) And standard deviation (sigma/root n)
+				. When nothing is metioned alpha is taken as 5%. 
+				
+				. For this value of alpha, 'x' value comes out to be 29.658K and 'z' as 1.645
+				
+					** Since Excel gives Cumilative Probability and alpha of 5% (Right Tailed test.) means take 1 - 0.05 = 0.95 as Cumilative probability in Excel Computation.
+					If it was a negative tail or left tail we need to put 0.05.
+					. Excel function --> Norm.s.inv(0.95) gives 1.645, this is the critical value of z.
+					. To find critical x-bar value Use , z = (x-bar - mu)/ (sigma/root n) given z = 1.645, sigma = 8K, n = 400 this give critical x-bar value as 29.658K.
+				
+				. Meaning of above line is 'x' & 'z' values less than above mentined critical values "DO NOT REJECT NULL HYPOTHESIS"
+				. If 'x' & 'z' values are more than above mentined critical values "REJECT NULL HYPOTHESIS"
+				
+				
+				. In our case z = 2.5 and falls in rejection region which is greater than critical 'z' value 1.645 so we can "REJECT NULL HYPOTHESIS"
+				. The new product line can be released to current mkt with 95% cofidence level.
+				
+			Steps to Solve:
+			
+				- Draw the diagram bell-curve.
+				- Mark the Critical Region, Acceptance Region & Rejection Region.
+				- Compute the 'z' value.
+				- Get the critical 'z' value.
+				- Based on the relation (greater/lesser) b/w computed 'z' and critical 'z' we decide to Reject/Accept Null HYPOTHESIS.
+				
+			P-Value: Actual Significance Value
+			
+				If x-bar is 30K & z is 2.5 what is the Probability that z>= 2.5 
+				
+				In Excel Norm.s.dist(2.5) = 0.994
+				
+				Sincce we need Probability/area for z>= 2.5 it is 1 - 0.994 = 0.006
+				
+				This value is sometimes called the actual significance level, or the p-value. This is the level at which the null hypothesis gets rejected.
+				- 'p' value gives you the actual risk or level of significance by which null hypothesisis rejected.
+				
+			Solution Method -1 :
+				Whem p < alpha Null Hypothesis is rejected.
+				
+			Solution Method -2 :
+				If the computed z falls in rejection Region reject the Null Hypothesis.(Critical value of z helps to find rejection region) 
+
+----------------------------------------------------------------------
+
+Hypothesis Testing - Inline Question:
+
+	A retailer is weighing strawberries to sell as 250g punnets. A customer has complained that strawberries he had bought previously weighed under 250g. The
+	retailer decides to check the weight of 36 punnets. He finds that the average weight is 248.5g. with standard deviation 4.8g. In using a significance test to judge
+	whether he is selling under-weight punnets, which of the following conclusions is correct?
+	
+	a. At 5% level he is selling under weight.
+	b. At 5% level he is not selling under weight.
+	c. At 5% level the test is inconclusive.
+	d. A significance test is inappropriate in this case.
+	
+	Soln: Lets formulate Null & Alternate hypothesis
+	
+		H0: µ = 250 --> Null Hypothesis
+		H1: µ < 250 --> Alternate Hypothesis
+		
+		The Alternate hypothesis indicates a direction - here it is left of the mean.
+		One - tailed test on the -ve side - Left Tailed test.
+	
+		x-bar -> 248.5
+		sigma -> 4.8
+		n -> 36
+		mu -> 250
+		
+		z = (x-bar - mu)/ (sigma/root n)
+		z = -1.875 --> z - computed.
+		
+		Lets find the critical Region:
+		
+			let's take alpha as 5% or 0.05
+			now lets find z-critical for this Probability of 0.05
+			Using Excel Norm.s.inv(0.05) = -1.645 [Since it's a left Tailed we find Norm.s.inv for 0.05 not 1 - 0.05]
+			
+			So from LHS to z = -1.645 is a Rejection Region.
+			
+			z - computed which is -1.875 falls in this Rejection Region. So Null Hypothesis can be rejected.
+			
+		So Correct option is 'a' At 5% level he is selling under weight.
+		
+Hypothesis Formulation Exercises :
+
+	State the Null and Alternative Hypothesis for the following:
+
+	1)  Is the average waiting time for the customers of Smart Supermarket at the checkouts greater than 15 minutes?
+		Null Hypothesis H0 -> mu = 15
+		Alternate Hypothesis H1 -> mu >15
+		
+	2) Is the proportion of households owning Color TVs in Chennai less than 0.4?
+		Null Hypothesis H0 -> pi = 0.4
+		Alternate Hypothesis H1 -> pi < 0.4
+		
+	3) Is the average expenditure per household on eating out significantly higher in Bangalore than in Calcutta?
+		Null Hypothesis H0 ->mu_bang == mu_cal
+		Alternate Hypothesis H1 -> mu_bang > mu_cal
+		
+	4) Two random sample surveys, conducted with two months gap between the two, assessed public opinions on the outcome: The
+	question that was posed was “If the general election was going to take place tomorrow, would you cast your vote for or against the ruling party?”
+	
+		** This is a two-tailed test.
+		
+		Null Hypothesis H0 -> pi1 == pi2
+		Alternate Hypothesis H1 -> pi1 != pi2
+		
+----------------------------------------------------------------------
+T - Test:
+
+	Above test was "Z-Test". Z-Test has few limitations:
+		- It requres all values for computation of 'z' (mu, x-bar, n, sigma)
+		- Sample size 'n' should be reater than or equal to 30.
+		
+	Inferental ststs is all about studying the sample and inferring to Population, might be due to constrints of time and availability of resources.
+	
+	In todays time we have sufficient resourcesto store & process large mount of data,  to study about population instead of studying Samples 
+	and then infering to Population.
+
+	Degrees of freedom:
+	
+		Consider 4 chairs in a room.
+		
+		1st person entering room has 4 options to select.
+		2nd person entering room has 3 options to select.
+		3rd person entering room has 2 options to select.
+		4th person entering room has only 1 options to select.
+		
+		In general for size 'n' , n-1 will have choices 2 or more so te degree of freedom for size 'n' is n-1.
+	
+	One Sample T-test:
+	
+		t = (x-bar - mu)/ (s / root n)
+		
+		x-bar -->sample mean
+		mu --> hypothesized mean
+		n --> sample size
+		s --> sample std deviation
+		
+		degrees of freedon -> n-1
+		
+	Problem: One Sample T - test
+		
+		Experian Marketing Services reported that the typical American spends a mean of 144 minutes (2.4 hours) per day accessing the
+		Internet via a mobile device. (Source: The 2014 Digital Marketer, available at ex.pn/1kXJjfX.) In order to test the validity of this
+		statement, you select a sample of 30 friends and family. The results for the time spent per day accessing the Internet via mobile device (in
+		minutes) are stored in InternetMobileTime.csv .
+		
+		1) Is there evidence that the population mean time spent per day accessing the Internet via mobile device is different from 144 minutes?
+		Use the p-value approach and a level of significance of 0.05.
+		
+		Soln:
+			Step-1:
+				H0 : mu == 144
+				H1 : mu != 144
+				
+			Step-2 :
+				alpha = 0.05
+				
+			Step-3 : One Sample T-test [z-test can't be performed since Population std deviation is not known]
+				t = (x-bar - mu)/ (s / root n) 
+				
+				mu = 144; n = 30;
+				s = 139.84; x-bar = 175.267; [These two values are calculated for given samples in csv file]
+				
+				t = 1.225
+				
+			Step-4 : Finding p value
+				Using Excel Function: 
+					TDIST(t-value, degree of freedom, one/two tailed test)
+					
+					TDIST(1.225, (30-1),2) = 0.2305 
+					[Degree of freedom is n-1, here Alternate hypothesis talks about not equal it can tke both leethan or greaterthan sp its 2 tailed test]
+					
+			Step-5 :
+				p-value computed > alpha
+				0.2305 > 0.05 
+				
+			Hence we fail to reject Null Hypothesis.
+			With 95% confidence we can tell typical American spends a mean of 144 minutes (2.4 hours) per day accessing theInternet via a mobile device.
+				
+	--------------------------------
+	Two Sample T -test:
+
+		here degree of freedom is 'n1 + n2 - 2'
+		
+		denominator = under root [(s1-square / n1) + (s2-square / n2)]
+		
+		t = (x1-bar - x2-bar) / denominator
+		
+		Problem: Two Sample T -test
+		
+			A hotel manager looks to enhance the initial impressions that hotel guests have when they check in. Contributing to initial impressions is
+			the time it takes to deliver a guest’s luggage to the room after checkin. A random sample of 20 deliveries on a particular day were selected
+			in Wing A of the hotel, and a random sample of 20 deliveries were selected in Wing B. The results are stored in Luggage.csv . Analyze the
+			data and determine whether there is a difference between the mean delivery times in the two wings of the hotel. (Use a = 0.05.)
+			
+		Soln: 
+			
+			Step-1 :
+				H0 : muA == muB
+				H1 : muA != muB
+				
+			Step-2 :
+				alpha = 0.05
+				
+			Step-3 : Two Sample T -test
+				denominator = under root [(s1-square / n1) + (s2-square / n2)]
+				t = (x1-bar - x2-bar) / denominator
+				
+				n1 = n2 = 20
+				
+				x1-bar = 10.397 ; x2-bar = 8.123 ; s1-square =  1.877; s2-squre = 2.008 ; 
+				[These values are calculated for given samples in csv file]
+				
+				t = 5.162
+				
+			Step-4 : Finding p value
+				Using Excel Function: 
+					TDIST(t-value, degree of freedom, one/two tailed test)
+					
+					degree of freedom = n1 + n2 - 2 = 20 + 20 - 2 = 38 
+					
+					TDIST(5.162, 38, 2) = 8.007E-06
+					
+			Step-5 :
+				p-value computed < alpha
+				8.007E-06 < 0.05
+				
+			Hence we can reject Null Hypothesis
+			With 95% confidence we can tell there is a difference between the mean delivery times in the two wings of the hotel.
+			
+	--------------------------------
+	Paired T - test
+	
+		Example : Compute Blood Pressure of patients before and after medications.
+		
+		** Condition here is number of observations before & after should be same.
+		
+		t = d-bar / (sd / root-n)
+		
+		d-bar --> Average of the paired difference
+		n --> sample size
+		sd --> Std deviation of the paired difference
+		
+		degree of freedom = n - 1
+		
+		
+		Problem:
+		
+			The file Concrete.csv contains compressive strength of 40 samples of concrete taken 2 & 7 days after pouring.
+			At 0.01 level of significance is there evidance that the mean strength is lower at 2 days than at 7 days.
+			
+		Soln:
+		
+			Step-1:
+				H0: mu2 == mu7
+				H1: mu2 < mu7
+				
+			Step-2 :
+				alpha = 0.01
+				
+			Step-3 : Paired T - test
+			
+				First compute difference b/w 7days & 2days as new colmn
+				
+				d-bar -> mean of new colmn = 0.553
+				sd -> std deviation of new colmn = 0.373
+				n -> 40
+				degree of freedom = n - 1 = 39
+				
+				t = d-bar / (sd / root-n) = 9.372
+				
+			Step-4 : Finding p value
+				Using Excel Function: 
+					TDIST(t-value, degree of freedom, one/two tailed test)
+					
+					TDIST(9.372, 39, 1) = 7.76E-12
+					
+			Step-5 :
+				p-value computed < alpha
+				7.76E-12 < 0.01
+				
+			Hence we can reject Null Hypothesis.
+			With 99% confidence we can tell mean strength is lower at 2 days than at 7 days
+				
+----------------------------------------------------------------------
+Chi - Square Test:
+
+	To understand the direction of association of numerical variables / continuous variables we have correlation.
+	Similarly for categorical variables we have chi-square test.
+	
+	x-sq --> Test Statistic
+	Summation --> The sum of
+	
+	O --> Observed Frequencies
+	E --> Expected Frequencies
+	
+	x-sq = Summation [ (0 - E) square / E]
+	
+	degree of freedom = (m-1)(n-1) m,n represent rows n colmns in a cross tab.
+	
+	Problem:
+	
+		Two companies A & B were meged. After the first appraisal cycle post merger, employees originally belonging to company B have
+		put an allegation that the management favours employees who were originally a part of company A.
+		At 95% confidence perorm a hypothesis test to validate if the claim holds good.
+		
+						Promotion Status
+			Company			P		NP		Total
+				A			15		9		24
+				B			16		15		31
+				Total		31		24		55
+				
+	Soln:
+		
+		Step-1 :
+			H0 : There is no influence of background on Promotion
+			H1 : Promotions are biased.
+			
+		Step-2 :
+			alpha = 0.05
+			
+		Step-3 :
+			
+			From above given table 
+				promoting percentage (ir-respective of Background) 31/55 = 56.4%
+				not promoting percentage 24/55 = 43.6%
+				
+			Expected colmn values are computed by multiplying above percentages with total num of Employess of Comp-A & Comp-B
+			[24*56.4% = 13.5, 24*43.6% = 10.5, 31*56.4% = 17.5, 31*43.6% = 13.5]
+			
+			Lets List down observed & Expected values
+			
+									Observed	Expected	Test Statistic = [ (0 - E) square / E]
+			Comp-A Promoted			15			13.5		0.16	
+			Comp-A Not Promoted		9			10.5		0.21
+			Comp-B Promoted			16			17.5		0.12
+			Comp-B Not Promoted		15			13.5		0.16
+			
+			Summation value of last colmn is 0.65 this is x-sq
+			
+		Step-4 : Finding p value
+			Using Excel Function: 
+				CHIDIST(x-sq, degree of freedom)
+				
+				degree of freedom = (2-1)(2-1)  [2-companies as rows & promoted & not promoted as colmns]
+				
+				p-value = CHIDIST(0.65,1) = 0.419
+				
+		Step-5 : 
+			p-value computed > alpha
+			0.419 > 0.05
+			
+			Hence we cannot reject Null Hypothesis.
+			With 95% confidence we can tell There is no influence of background on Promotion
+			
+----------------------------------------------------------------------
+T-test hands on:
+	
+	One Sample T-test:
+	
+		import numpy as np
+		import pandas as pd
+		import math
+		from scipy import stats
+		from scipy.stats import   ttest_1samp
+		
+		t_statistic, p_value = ttest_1samp(mydata, 144)
+		
+		# compare p-value with alpha & take decision
+		
+	Two Sample T-test:
+		
+		import numpy as np
+		import pandas as pd
+		from   scipy.stats import ttest_1samp, ttest_ind
+		
+		t_statistic, p_value  = ttest_ind(mydata['WingA'],mydata['WingB'])
+		# compare p-value with alpha & take decision
+		
+	Paired T-test:
+		
+		import scipy.stats as stats
+		
+		t_statistic, p_value  =  stats.ttest_rel(mydata['Two Days'],mydata['Seven Days']) # this gives p-value for two-tailed test
+		# If one-tailed p-value is required divide above p-value by 2
+		# compare p-value with alpha & take decision
+		
+----------------------------------------------------------------------
+Chi-Square Test Handson:
+
+	import numpy              as        np
+	import pandas             as        pd
+	import matplotlib.pyplot  as        plt
+	from   scipy.stats        import    chi2_contingency
+	
+	df = pd.DataFrame({'Promoted': [15, 16], 'Not-promoted': [9, 15]}, index = ['Company A', 'Company B'])
+	
+	chi2, pval, dof, exp_freq = chi2_contingency(df, correction = False)
+	# compare p-value with alpha & take decision
+	
+----------------------------------------------------------------------
