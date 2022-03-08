@@ -1,0 +1,193 @@
+Ovierview:
+----------
+
+	In Statistical Methords for Decision Making we learnt about:
+		1) Descriptive Statistics
+		2) Inferential Statistics
+		3) Hypothesis Statistics : Analysisng variation into different samples and then coming to conclusion weather we can prove / disprove the Hypothesis.
+		
+	In Advanced Statistics:
+		1) ANOVA
+		2) Exploratory Data Analysis (EDA)
+		3) Principal Component Analysis (PCA)
+		
+	ANOVA :
+		- Analysis of Variance.
+		- Extention of Hypothesis Testing.
+		- Hypothesis Testing for more than 2 samples.
+		
+	Exploratory Data Analysis (EDA) :
+		
+		Life Cycle of Problem solving : Business Problem --(Translated into)--> Analytical Problem --(Translated into)--> EDA --> Model Building --> Generate Insights --> Give Recommendations which will be actioned upon.
+		Any Good model is as good as data which is fed to it. If data is not good we can't expect quality outcomes from model.This is why EDA is very important.
+		
+	Principal Component Analysis (PCA) :
+		- Means of variable reduction. 
+		- If you want to increase sales, sales is dependent of several factors, Concentrating on all factors will be difficult. So clubbing thes factors and concentrating only on these groups would be easier. This is variable reduction.
+		
+---------------------------------------------------------------------------------------
+ANOVA - Analysis Of Variance
+
+	- Technique that helps us to compare means not variances.
+	- Extention of independent t test - To compare more than 2 population means.
+	
+	Null Hypothesis is formulated as:
+	H0 => mu1 = mu2 = mu3 = .... = muk - for testing equality of population means of 'k populations.
+	
+---------------------------------------------------------------------------------------
+Assumptions involved in using ANOVA:
+
+	- Samples drawn from different populations are independent and random.
+	- Response variables of of all the populations are continuous & (ideally) normally distributed.
+	- Variances of all populations are equal - atleast approximately.
+
+---------------------------------------------------------------------------------------
+Hypothesis Test of One way ANOVA:
+
+	Formulation of Null & Alternate Hypothesis:
+	
+	H0 => mu1 = mu2 = mu3 = .... = muk - All population means are equal.
+	H1 => Not All population means are equal.(Atleast one pair population mean is unequal)
+	
+	ANOVA is not used to tell where the difference came from out of different populations. It is is used to tell there is a difference.
+---------------------------------------------------------------------------------------
+One Way ANOVA:
+
+	Total Sum of Squares ≡ Treatment Sum of Squares + Error Sum of Squares.
+---------------------------------------------------------------------------------------
+Two Way ANOVA:
+
+	- The two-way ANOVA compares the mean differences between groups that have been split on two independent variables (called factors).
+	- The primary purpose of a two-way ANOVA to understand if there is an interaction between the two independent variables on the dependent variable. 
+	- For example, to understand if there is a relation between age and educational level on job experience amongst candidates, where age (25-30) and education
+	  level (undergraduate/postgraduate) are independent variables, and job experience is dependent variable. 
+	- Here we will have multiple hypothesis(2) one per treatment/factor.
+	
+Assumptions involved in Two way ANOVA:
+
+	• Dependent variable should be measured at the continuous level.
+	• Two independent variables should each consist of two or more categorical, independent groups.
+	• There should be no significant outliers.
+	• Dependent variable should be approximately normally distributed for each combination of the groups of the two independent variables. 
+---------------------------------------------------------------------------------------
+Hands-on Exercise ANOVA:
+
+Dataset - paul-newfood.csv
+
+One-Way ANOVA:
+	
+	formulae = 'Sales ~ C(PriceLevel)'
+	
+	formulae = 'Sales ~ C(AdLevel)'
+	
+	ANOVA Table to be constructed.(Explained in following table)
+----------------------------------
+
+1-Way ANOVA => In the Above Problem we saw effect of each Independent variable induvisually on Dependent variable.
+	
+2-Way ANOVA => To Consider the effect of each Independent variable induvisually and also the interaction of those 2 variables.
+
+----------------------------------
+Two-Way ANOVA :
+
+	** Independent variable / Factors / Treatments should be Categorical Variables for ANOVA.
+
+		- Sales are dependent on Pricing & Advertising ? Paul is trying to understand.
+		- There are 3 price levels and 2 advertising levels -> Price and Advertising are categorical variables.
+		- So there are 2*3 = 6 combinations of price and advertising, that current design consists.
+		- Does Price matter for sales ?
+		
+		
+		Stats module needs a formula to fit data into model. Formula is used to tell :
+			- which variables are independent variables and which are dependent variables.
+			- which variables are I/P variables and which are O/P variables.
+			- which are cause variables and which are effect variables.
+		
+		
+		Step -1) Covert Factors into Categorical variable.
+			
+			DF.PriceLevel = pd.Categorical(DF.PriceLevel)
+			
+		Step 2) Define a formulae
+		
+			formulae = 'Sales ~ C(PriceLevel) + C(AdLevel)'
+			
+			# Sales is a O/P variable dependent on 2 Independent categoricalvariables PriceLevel & AdLevel
+			# '+' doesn't mean add here it means and since we have more than one independent variables.
+			# 'C' represent to use values of resepective columns as Categorical variable not by their value.
+			
+		Step 3) Model Fitting
+		
+			model = ols(formula, DF).fit()
+			
+			# ols [ordinary least squares] is the model fitting Algorithm.
+			
+		Step 4) ANOVA Table
+		
+			Using above model we will generate ANOVA Table as follows.
+			aov_table = anova_lm(model)
+			print(aov_table)
+			
+							 df         sum_sq        mean_sq          F    PR(>F)
+			C(PriceLevel)   2.0  600412.583333  300206.291667  13.663982  0.000182
+			C(AdLevel)      1.0      32.666667      32.666667   0.001487  0.969624
+			Residual       20.0  439412.583333   21970.629167        NaN       NaN
+
+			
+			# here we will have rows = independent variables and Residual row.
+			
+			# df column is degrees of Freedom. 
+				- PriceLevel has 3 categories so df = 2
+				- AdLevel has 2 categories so df = 1
+				- Residual df = 20 [24 - 1 = 23 remove above 2 values from this 23 - 2 -1 = 20] Overall columnar sum should be (n - 1)
+				
+			# sum_sq column 
+				- PriceLevel has 3 price groups. so sum of squares of difference b/w each price group's mean and overall mean. [Between Sums of squares of Price]
+				- AdLevel has 2 groups. so sum of squares of difference b/w each Ad group's mean and overall mean. [Between Sums of squares of Advertisements]
+				- Residual -> sum of squares of difference b/w each of 12 Segments/Factor/Treatment combinations and overall mean [Within sums of squares]
+				
+			# mean_sq column : sum_sq / df
+			
+			# F column : mean_sq of factor / mean_sq of Residual
+				- F for C(PriceLevel) is 13.67 which means "Variance b/w price levels is 13 times variance b/w segments "
+				- Variance across Ad levels is very less compared to Variance b/w segments.
+				
+			# PR column : p-value
+				- p-value for C(PriceLevel) is 0.000182 < 0.05 so we reject Null Hypothesis. 
+						Null Hypothesis was mean sales across different price groups are same . This is rejected.
+						"So Price is factor influencing Sales." => "Price is a cause, Sales is an effect"
+				- p-value for C(AdLevel) is 0.969624 > 0.05 so we can't reject Null Hypothesis.
+						Null Hypothesis was mean sales across different Advertising groups are same . This is accepted.
+						"So Adv is not influencing Sales."
+						
+			"Price is a main Cause and Adv is not main cause for Sales."
+			
+		Step -5) Visualization
+		
+			sns.pointplot(x='PriceLevel', y='Sales', data=DF, hue='AdLevel')
+			
+----------------------------------
+Two-Way ANOVA with Interaction:
+		
+	To consider effect of Interaction Variable. The formulae in step 2 changes. All other steps are same.
+	
+		Step 1) Formulae:
+		
+			formula = 'Sales ~ C(PriceLevel) + C(AdLevel) + C(PriceLevel):C(AdLevel)'
+			: -> interaction
+			+ -> and
+			
+		Table:
+										df         sum_sq        mean_sq          F  	PR(>F)
+			C(PriceLevel)              2.0  600412.583333  300206.291667  14.781913   0.000159
+			C(AdLevel)                 1.0      32.666667      32.666667   0.001608   0.968450
+			C(PriceLevel):C(AdLevel)   2.0   73850.083333   36925.041667   1.818159   0.190898
+			Residual                  18.0  365562.500000   20309.027778        NaN        NaN
+			
+		p-value for C(PriceLevel):C(AdLevel) is 0.190898 >  0.05 so we can't reject Null Hypothesis.
+		Interaction b/w both variables together doesn't have impact on sales.
+	
+------------------------------------------------------------------------------------------------------------------------------------------
+Reading tab seperated csv:
+
+rate=pd.read_csv('car_insurance_rate.csv', sep='\t')

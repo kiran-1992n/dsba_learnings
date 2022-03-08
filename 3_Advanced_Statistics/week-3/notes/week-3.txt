@@ -1,0 +1,263 @@
+Principle Component Analysis:
+
+	- The data which is available is combination of Information(Signal of Interest) and Noise(unwanted data).
+	- Information is stored in the spread.
+	- PCA tries to maximize signal content / information content that we get and reduce the noise level in the Signals.
+	- This is called Signal to Noise Ratio (S/N) in communication domain.	
+	
+-------------------------------------------------
+PCA on model:
+
+	In a model building activity we define 'y' as function of 2 independent variables 'x1' and 'x2'.
+	y = f(x1,x2)
+
+	y -> Dependent variables
+	x1,x2 -> Independent variables.
+
+	Strictly speaking x1,x2 should be Independent. 'y' is dependent on 'x1', and 'y' is dependent on 'x2'.
+	But in realtime data  x1 & x2 aren't Independent, there is some sort of Correlation b/w them and 'y' is also dependent on this correlation.
+	
+	This dependency of 'y' on correlation b/w x1 & x2 is redundant.
+	
+	- PCA increases the signal content provided to Algorithm to build the model.
+	- PCA helps in eliminating the unwanted redundancies being fed to model.
+	
+	When you have too many redundant dimensions then you are committing - Curse of Dimensionality
+	
+-------------------------------------------------
+PCA Step By Step Approach:
+
+	- Standardise the data (Centralize the data around mean value) using z-score technique.
+	- Construct co-variance matrix for zscores of independent variables.
+	
+	** Data on all the dimensions are subtracted from their means to shift the data point to the - Origin.
+	** Signal to Noise ratio refers to: Variance in Signal/Variance in Noise
+	
+-------------------------------------------------
+	For a model bulding we only feed 1-D info.
+
+	y = f(x1,x2)
+	
+	Here only y dependent on x1(1-Dimension) & y dependent on x2(1-Dimension) is fed.
+	If we feed the Mathematical space or the co-variance space also to the model then model will be more accurate.
+	
+	** The covariance Matrix is a mathematical representation of the total variance of individual dimensions and across dimensions.
+-------------------------------------------------
+PCA For dimentionality Reduction:
+
+	- PCA can also be used to reduce dimensions
+	- Arrange all eigen vectors along with corresponding eigen values in descending order of eigen values
+	- Plot a cumulative eigen_value graph (Refer Pdf)
+	- Eigen vectors with insignificant contribution to total eigen values can be removed from analysis
+-------------------------------------------------
+PCA
+
+	PC1 = a1x1 + a2x2 + .... + anxn
+	PC2 = b1x1 + b2x2 + .... + bnxn
+	PC3 = c1x1 + c2x2 + .... + cnxn
+	
+	where :
+	
+		PC1, PC2, PC3 -> Principle Components
+		x1,x2,....,xn -> original data / independent variables
+		a1,a2,....,an -> Eigen vectors
+		b1,b2,....,bn -> Eigen vectors
+		c1,c2,....,cn -> Eigen vectors
+	
+
+PCA Coding:
+
+	1) Create a new DF with only Independent columns/Variables.
+	
+		df_pca = df.drop(['City', 'Date', 'AQI', 'AQI_Bucket'], axis = 1)
+		
+	2) Check for presence of outliers in each feature
+	
+		plt.figure(figsize = (12,8))
+		feature_list = df_pca.columns
+		for i in range(len(feature_list)):
+			plt.subplot(3, 4, i + 1)
+			sns.boxplot(y = df_pca[feature_list[i]], data = df_pca)
+			plt.title('Boxplot of {}'.format(feature_list[i]))
+			plt.tight_layout()
+			
+	3) Treat the Outliers
+	
+		- PCA Relies on Correlation. And Correlation uses Averages.
+		- Averages are not meaningful if outliers are present.Outliers will inflate Average Value.
+		- So treating outliers is important.
+	
+		#Define a function which returns the Upper and Lower limit to detect outliers for each feature
+		def remove_outlier(col):
+			Q1,Q3=col.quantile([0.25,0.75])
+			IQR=Q3-Q1
+			lower_range= Q1-(1.5 * IQR)
+			upper_range= Q3+(1.5 * IQR)
+			return lower_range, upper_range   
+		
+		#Cap & floor the values beyond the outlier boundaries
+		for i in feature_list:
+			LL, UL = remove_outlier(df_pca[i])
+			df_pca[i] = np.where(df_pca[i] > UL, UL, df_pca[i])
+			df_pca[i] = np.where(df_pca[i] < LL, LL, df_pca[i])
+			
+		#Check to verify if outliers have been treated
+		plt.figure(figsize = (12,8))
+		feature_list = df_pca.columns
+		for i in range(len(feature_list)):
+			plt.subplot(3, 4, i + 1)
+			sns.boxplot(y = df_pca[feature_list[i]], data = df_pca)
+			plt.title('Boxplot of {}'.format(feature_list[i]))
+			plt.tight_layout()
+	
+	4) Check the descriptive stats to observe scale issues between the variables
+
+		df_pca.describe().T
+		
+	5) Scale the data - Data Standardisation
+	
+		- From the descriptive stats we observe that different colmns have different magnitudes(different range/ max-min of values).
+		- So scaling of data is required before PCA.
+		
+		from scipy.stats import zscore
+		df_pca_scaled = df_pca.apply(zscore)
+		
+	6) Check for presence of correlations
+
+		plt.figure(figsize = (10,8))
+		sns.heatmap(df_pca_scaled.corr(), annot=True,fmt='.2f');
+		
+	7) Pre-Requisite-1) Verify weather we have significant amount of Correlation to proceed for PCA
+	
+		- How do we know right correlation Benchmark for data?
+		- We have ststistical test - bartlett-sphericity for this purpose.
+		
+		#Confirm the statistical significance of correlations
+		#H0: Correlations are not significant, H1: There are significant correlations
+		#Reject H0 if p-value < 0.05
+		
+		from factor_analyzer.factor_analyzer import calculate_bartlett_sphericity
+		chi_square_value,p_value=calculate_bartlett_sphericity(df_pca_scaled)
+		p_value
+		
+		** There should be Significant Correlation for computing PCA, else we stop at this point.
+		
+	8) Pre-Requisite-2) Sample Adequecy - Do we have enough data to explore PCA
+	
+		#Confirm the adequacy of sample size. 
+		#Note: Above 0.7 is good, below 0.5 is not acceptable
+
+		from factor_analyzer.factor_analyzer import calculate_kmo
+		kmo_all,kmo_model=calculate_kmo(df_pca_scaled)
+		kmo_model
+		
+		** Adequate samples are required for computing PCA, else we need to collect more data.
+		
+	9) PCA Computation
+	
+		#Apply PCA taking all features
+		
+		from sklearn.decomposition import PCA
+		pca = PCA(n_components=12, random_state=123) # n = 12 since we have 12 features / columns
+		pca_transformed = pca.fit_transform(df_pca_scaled)
+		
+		i) Extract Eigen vectors
+		
+			pca.components_
+			
+		ii) Extract Eigen values
+		
+			# Note: This is always returned in descending order
+			pca.explained_variance_
+			
+			** Sum of Eigen values will sum upto total number of Principal Components.
+			
+		iii) Check the explained variance for each PC
+		
+			#Note: Explained variance = (eigen value of each PC)/(sum of eigen values of all PCs)
+			pca.explained_variance_ratio_
+			
+		iv) Create a dataframe containing the loadings or coefficients of all PCs
+		
+			df_extracted_loadings = pd.DataFrame(pca.components_.T, 
+                                     columns = ['PC1','PC2', 'PC3', 'PC4', 'PC5', 'PC6',
+                                               'PC7','PC8', 'PC9', 'PC10', 'PC11', 'PC12'],
+                                    index = df_pca_scaled.columns)
+									
+			df_extracted_loadings
+			
+		v) Create a scree plot
+		
+			plt.figure(figsize=(8,5))
+			sns.lineplot(y=pca.explained_variance_ratio_ ,x=range(1,13),marker='o')
+			plt.xlabel('Number of Components',fontsize=10)
+			plt.ylabel('Variance Explained',fontsize=10)
+			plt.title('Scree Plot',fontsize=12)
+			plt.grid()
+			plt.show()
+			
+		vi) PCA For dimentionality/Component Reduction
+		
+			# Check the cumlative explained variance ratio to find a cut off for selecting the number of PCs
+			np.cumsum(pca.explained_variance_ratio_)
+			
+			- With only 5 Principle Components we are able to get more than 80% of information. So remaining components can be skipped.(check values in ipynb to know how 5)
+			- So we have reduced 12 to 5.
+			
+			# Choose the PCs basis cumulative explained variance
+			df_selected = df_extracted_loadings[['PC1','PC2', 'PC3', 'PC4', 'PC5']]
+			
+			#Check the selected PCs
+			df_selected
+			
+			# Check as to how the original features matter to each PC
+			# Note: Here we are only considering the absolute values
+			plt.figure(figsize = (12,8))
+			for i in range(len(df_selected.columns)):
+				plt.subplot(3,2,i+1)
+				abs(df_selected[df_selected.columns[i]]).T.sort_values(ascending = False).plot.bar()
+				plt.yticks(np.arange(0,1.2,.2))
+				plt.title('Abs. loadings of {}'.format(df_selected.columns[i]))
+				plt.tight_layout()
+				
+			#Compare how the original features influence various PCs
+			plt.figure(figsize = (12,8))
+			sns.heatmap(abs(df_selected), annot = True, cmap = 'Blues',fmt = '.2f');
+			
+			# In order to calculate PC scores we need loadings, below:
+			df_selected
+			
+			#...and we need the original scaled features
+			df_pca_scaled.iloc[0]
+			
+			#We need to perform a dot product between the loadings and features to obtain the scores
+			for i in df_selected.columns:
+				pc_score = np.dot(df_selected[i], df_pca_scaled.iloc[0])
+				print(round(pc_score, 6), end = ' ')
+			
+			#Above step involves a lot of hard work. Let's do it the easier way
+			#Extract the required(as per the cumulative explained variance) number of PCs
+			pca = PCA(n_components=5, random_state=123)
+			pca_final = pca.fit_transform(df_pca_scaled)
+			
+			#Just create a dataframe out of fit_transformed scaled data above
+			#Note: Notice the output of cell 34 and the first row of the dataframe below
+			pca_final_df = pd.DataFrame(pca_final, columns = df_selected.columns)
+			pca_final_df.head(10)
+			
+			#Check for presence of correlations among teh PCs
+			plt.figure(figsize = (10,8))
+			sns.heatmap(pca_final_df.corr(), annot=True,fmt='.2f');
+			
+	** PC is transformation of original data.
+--------------------------------------------------------------------------------------------
+Mentor Session:
+
+	In Interview 
+	
+	PCA -> Curse of Dimentionality
+	
+		- As the dimentions/input colms increase model building becomes complex.
+		- So we use PCA for dimentionality reduction and then build model using Principal Components
+		
+		

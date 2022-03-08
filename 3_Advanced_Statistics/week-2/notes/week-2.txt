@@ -1,0 +1,357 @@
+Exploratory Data Analysis:
+
+	EDA Approach:
+		- Describe Data (Descriptive Analytics)
+			. Scope of the data
+			. Time relevance of the data
+			. Quantum of data
+			. Features of the data
+		- Data Pre-processing
+			. Bad values
+			. Anomalies (Not valid or not adhering to business rules)
+			. Missing values
+			. Not Useful Data
+		- Data Visualization
+		- Data Preparation
+		
+	** Feature or column with more than 25-30% missing values 
+	
+---------------------------------------------------------------------------------------------
+Data Pre-processing:
+
+	Bad Value:
+
+		- Say a bad character is entered in a column which is numeric (int/float).
+		- Presence of bad character treats this column/feature as Object field instead of Numeric field.
+		- Since its on numeric we wont be able to get central tendancy values.
+		
+		Example here '?' was special character present in data set.
+			
+			Step-1) First replace '?' with Null
+			
+				df['referral_aptitude_reasoning_score'] = df['referral_aptitude_reasoning_score'].replace('?',np.NaN)
+				df['referral_aptitude_numerical_score'] = df['referral_aptitude_numerical_score'].replace('?',np.NaN)
+				
+			Step-2) Set the type of column as required.
+			
+				df['referral_aptitude_reasoning_score'] = df['referral_aptitude_reasoning_score'].astype('float64')
+				df['referral_aptitude_numerical_score'] = df['referral_aptitude_numerical_score'].astype('float64')
+				
+		Example here '?' was special character present in categorical variable.
+		
+			Step-1) First replace '?' with Mode value.
+			
+				df['referral_gender'] = df['referral_gender'].replace('?',df['referral_gender'].mode()[0])
+
+
+	Treat Anomalies:
+	
+		- Marks column is of Numeric type. It can take only positive values.
+		- In the given dataset we see '-1' is entered for 2 columns. So this is invalid I/P.
+		
+		Example here for 10std and graduation marks is entered as '-1'
+			
+			Treating the anomaly here is by considering 12th marks for 10th marks where we have '-1'
+			# In this case we are assigning 12th marks. Need not be same every time . Other options to assign are mean , Median, Mode ...
+			
+				marks_12th = df[df['referral_10_th_marks'] < 35]['referral_12th_marks'].values[0]
+				df['referral_10_th_marks'] = df['referral_10_th_marks'].replace(to_replace=-1,value=marks_12th, inplace = True)
+				
+				df['referral_graduation_marks'] = df['referral_graduation_marks'].replace(-1,df['referral_graduation_marks'].mean(),inplace = True)
+				
+	Treat Missing Value:
+	
+		- Several colmns in dataset has 1 or more Na/Null values.
+		- We impute values(mean/median/any value...) to these Na/Null values.
+		
+		Example here verbal_score column has Na/Null values
+			
+			df.referral_aptitude_verbal_score=df.referral_aptitude_verbal_score.fillna(df.referral_aptitude_verbal_score.mean(),inplace = True)
+			
+		- Above way of replacing values is simple for 1 or 2 colmns.
+		- For Na/Null values in multiple columns, we can group Numeric(int and float datatype) and Categorical(Object datatype) Columns.
+		- Then impute the value.
+		
+			Step-1)Grouping Columns.
+				
+				df_num = df.select_dtypes(['float64','int64'])
+				df_cat = df.select_dtypes(['object'])
+				
+			Step-2)Imputing the value.
+			
+				from sklearn.impute import SimpleImputer
+				imputer = SimpleImputer(missing_values= np.nan, strategy='median')
+				
+				imr = imputer.fit(df_num)
+				df_num = pd.DataFrame(imr.transform(df_num), columns=df_num.columns)
+				
+		If we have a large dataset and there are very few records with null values we can choose to drop these records using the below command
+			
+			df=df.dropna()
+			
+	Handling Duplicates:
+	
+		Step-1) Check for duplicates
+		
+			dups = df.duplicated()
+			print('Number of duplicate rows = %d' % (dups.sum()))
+			
+		Step-2) If there are duplicates we can drop them using the below command
+
+			df.drop_duplicates(inplace=True)
+			
+---------------------------------------------------------------------------------------------
+Data Visualization:
+
+	- Data Analysis using Visualization includes:
+		. Univariate Analysis
+		. Bivariate Analysis
+		. Multivariate Analysis
+		
+	Univariate Analysis:
+	
+		1) Numeric Variables:
+			
+			Central Tendancy -> Mean, Median, Mode, 5 Number, Summary
+			Distribution -> Standard Deviation, Range, IQR
+			Graphs -> Histogram, Boxplot
+			
+		2) Categorical Variables:
+		
+			Central Tendancy ->  Mode
+			Distribution -> Frequency Of Levels
+			Graphs -> Countplot
+			
+	Bivariate Analysis:
+	
+		1) Numeric & Numeric -> Pair Plot/Scatter Plot , Correlation Plot/Heatmap
+		2) Categorical & Categorical -> Countplot with hue(different color)
+		3) Categorical & Numeric -> Boxplot (x as categorical & y as Numeric)
+		
+------------------------------------------------------------------------------------------------------
+Subplots in Seaborn:
+
+	fig, axes = plt.subplots(nrows=2,ncols=2)
+	fig.set_size_inches(10,8)
+	sns.histplot(df['referral_exp_in_years'], kde=True, ax=axes[0][0])
+	sns.boxplot(x='referral_exp_in_years', data=df, ax=axes[0][1])
+	sns.histplot(df['referral_current_salary'] , kde=True, ax=axes[1][0])
+	sns.boxplot(x='referral_current_salary', data=df , ax=axes[1][1])
+	plt.show()
+	
+Get the % values:
+
+	df['referral_preferred_city'].value_counts(normalize=True) # How much % does each city contribute.
+	
+	
+Multivariate Analysis:
+
+	g = sns.FacetGrid(df, col="referral_preferred_city", hue='Joined',col_wrap=3, height=3)
+	g = g.map(plt.scatter, "referral_graduation_marks", 'referral_expected_sal')
+	g.add_legend()
+
+------------------------------------------------------------------------------------------------------
+Data Prepration:
+
+	- Scaling
+	- Transformation
+	- Outliers Detection & Treatment
+	- Data Encoding
+	
+	Scaling, Transformation & Outliers Treatment are for Numeric field.
+	Data Encoding is for categorical field.
+	
+	Scaling:
+	
+		- In a dataset we will have different columns. 
+		- For example say we have salary column having values in thousands or lakhs and age column in years (b/w 18 t0 60) 
+		- When we feed this dataset to any Algo more weightage will be given to Salary because of its higher value compared to Age.
+		- So we do scaling so that Algo gives equal weigtage to all columns.
+		
+		Scaling Techniques:
+		
+			1) Z-score
+			
+				- Z = (X - μ ) / σ
+				- Scaled data will have mean tending to 0 and standard deviation tending to 1
+				
+			2) Min Max
+			
+				- (X-Xmin)/(Xmax-Xmin)
+				- Scaled data will range between 0 and 1
+				
+	Transformation:
+	
+		- When a variable is on larger scale, we can transform it to a lower scale using Log Transformation. To deal with Skewness
+		- For Positively Skewed features Log, Exponential, and Square Root Transformations are used
+		- For Negatively Skewed features Log, Cube Root, and Square Transformations are used
+		
+		** If data is transformed, results are obtained in terms of transformed data 
+		** Hence, care should be taken to reverse the same to conclude the results
+		
+	Outliers:
+	
+		- Outliers are data points that have a value significantly different than the rest of the values in the feature.
+		- It might be a valid data point or may have been caused due to error
+		- Hence, it is important to analyze the outliers before deciding on treatment
+		
+		- Outlier treatment is not mandatory. There are Algo's in ML which are not sensitive to Outliers.
+		- Treatment of outliers should not change the meaning of the data to a great extent which in turn reflects current business situation.
+		- Basic techniques to detect outliers Z Score & Boxplot.
+		
+	Data Encoding:
+	
+		- Categorical variables are converted into numerical format before giving them into Algo's.
+		
+		One Hot Encoding:
+		
+			- Each category is converted to a column having only boolean values
+			- Recommended if the there are less number of categorical levels within the field (less than 25)
+			
+		Label Encoding
+		
+			- When there are too many levels/categories in a variable in a dataset
+			- Assigning numeric value to each categorical level.
+			
+--------------------------------------------------------------------------------------------
+Seperating Numeric & Categorical Columns:
+
+	# Dropping the ID fearure before we scale numeric values as the same will not add any value in model building
+	df.drop(labels='referral_id',axis=1,inplace=True)
+	
+	cat=[]
+	num=[]
+	for i in df.columns:
+		if df[i].dtype=="object":
+			cat.append(i)
+		else:
+			num.append(i)
+	print(cat) 
+	print(num)
+	
+Scaling:
+
+	# Method 1
+	# Using Zscore for scaling/standardisation
+	
+		from scipy.stats import zscore
+		data_scaled=df[num].apply(zscore)
+	
+	# After applying zscore the mean tends to '0' and Std deviation tends to '1'
+	
+	# Method II
+	# Using standardScaler for Standardisation
+	
+		from sklearn.preprocessing import StandardScaler
+		scaler = StandardScaler().fit(df[num])
+		data_standard=scaler.transform(df[num])
+		data_standard=pd.DataFrame(data_standard, columns=df[num].columns)
+		data_standard.describe()
+	
+	# Method III Min-Max method
+	
+		from sklearn.preprocessing import MinMaxScaler
+		# build the scaler model
+		scaler = MinMaxScaler().fit(df[num])
+		# transform the test test
+		data_minmax = scaler.transform(df[num])
+		data_minmax=pd.DataFrame(data_minmax, columns=df[num].columns)
+		data_minmax.describe()
+	
+Transformation:
+
+	- Skewness assesses the extent to which a variable’s distribution is symmetrical
+	- Kurtosis is a measure of whether the distribution is too peaked
+	- For an ideal normal distribution (theoretical) Skewness and Kurtosis have to be between -1 to +1
+	
+	Apply various transformations, and based on Skewness and Kurtosis values we select suitable Transformation Technique.
+	
+	# For Actual Values without any Transformations
+	
+		print("skeness of referral_current_salary is",df['referral_current_salary'].skew())  # 6.18
+		print("kurtosis of referral_current_salary is ", df['referral_current_salary'].kurtosis())  # 89.46
+	
+	# 1) Using log transformation
+	
+		print(np.log(df['referral_current_salary']).skew())  # -0.53
+		print(np.log(df['referral_current_salary']).kurtosis())  # -0.25
+		
+	# 2) Using sqrt for transformation
+	
+		print(np.sqrt(df['referral_current_salary']).skew())  # 0.75
+		print(np.sqrt(df['referral_current_salary']).kurtosis())  # 7.32
+		
+	# 3) Using root of 10 for transformation
+	
+		print((df['referral_current_salary']**0.1).skew())  # -0.39
+		print((df['referral_current_salary']**0.1).kurtosis())  # 0.04
+		
+	In the above scenario, the transformation with root of 10 has given us best results, so we may choose to transform the data accordingly and check if it has 
+	helped in improving the model performance.
+	
+	Note: If continuous variables are being predicted, we need to make a note that the values that will get predicted for the transformed data are also in that form and have to be reversed. i.e. Exponential is inverse of log, square is inverse of square root etc.
+	
+Outlier Treatment:
+
+	### Method I (Z Score)
+	
+		df['referral_current_salary_zscore'] = ( df.referral_current_salary - df.referral_current_salary.mean() ) / df.referral_current_salary.std()
+		df['referral_current_salary_zscore'].describe()
+		
+		# Any zscore value '> 3' or '< 3' are outliers.
+		
+		# Let us calculate the value for referral_current_salary if ZScore has to be 3
+	
+		# z = (x - mu)/(std_dev) ==> x = 3 * std_dev + mu (z taken as 3)
+		# According to Normal Distribution & Emperical rule values beyond ==> mu + 3*sigma or mu - 3*sigma are treated as outliers.
+	
+		referral_current_salary_impute_value = (3*df.referral_current_salary.std()) + df.referral_current_salary.mean()
+		round(referral_current_salary_impute_value,2)
+		
+		# Get all indexes where z > 3
+		list1 = df[df['referral_current_salary_zscore'] > 3].index
+		
+		# Replace with imputed value
+		df['referral_current_salary'] = np.where(df.index.isin(list1), round(referral_current_salary_impute_value,2), 
+                                         df['referral_current_salary'])
+		# np.where(<condition_to_replace>, <value_to_be_replaced_if _condition_pass>, <vale_for_condition_fail>)
+		
+	### Boxplot method
+	
+		def remove_outlier(col):
+			sorted(col)
+			Q1,Q3=np.percentile(col,[25,75])
+			IQR=Q3-Q1
+			lower_range= Q1-(1.5 * IQR)
+			upper_range= Q3+(1.5 * IQR)
+			return lower_range, upper_range
+			
+		## Check the lower range and upper range for the variable with zscore
+		lr,ur=remove_outlier(df['referral_current_salary1'])
+		print("lower range",lr, "and upper range", ur)
+		
+		df['referral_current_salary1']=np.where(df['referral_current_salary1']>ur,ur,df['referral_current_salary1'])
+		df['referral_current_salary1']=np.where(df['referral_current_salary1']<lr,lr,df['referral_current_salary1'])
+		
+Encoding:
+
+	Label Encoding:
+	
+		# convert a column to a category, then use those category values for your label encoding:
+		df["referral_gender"] =df["referral_gender"].astype('category')
+		
+		df["referral_gender_cat"] = df["referral_gender"].cat.codes
+		# Each Catagorical value is assigned with a specific numeric value.
+		
+	One Hot Encoding:
+	
+		df_new =pd.get_dummies(df, columns=['gender', 'city'],drop_first=True)
+-------------------------------------------------------------------------------------------
+Necessity Of Standardisation:
+
+(Consider Education.csv from Project)
+
+Scaling or standardisation of variables is must before applying PCA because it will give more emphasis to those variables having higher variances than to those variables with very low variances while identifying the right principle component.
+Here in our dataset few columns like Apps, Accept, Enroll have information in terms of count, few columns like Top10perc, Top25pers, Terminal have information in terms of percentages, few columns like Room.Board, Books, Personal have information in terms of cost and there are columns like S.F.Ratio have information in terms of ratios.
+Since the data present in different columns are on different units scaling is necessary.
+Consider Apps column and Enroll column, both columns have information in terms of count. Values in Apps column may lie in the region 81 - 84094 while values in Enroll column lie in the region 35 – 6392 since Apps column is having higher variance compared to Enroll column PCA will give more weight tp Apps. Here standardization is required to tackle these issues.  
