@@ -1,0 +1,278 @@
+Decision Trees:
+
+	- Decision Tree model for a supervised learning algorithm which can be used for both classification and regression type of problems. 
+	- We train the model on the training set and validate it on the testing set. 
+	- The parent node gets split into child nodes and pruning is done to avoid overgrowing of sub-trees/branches.
+	
+	{Refer CART.pdf}
+	
+	Classification Techniques:
+	
+		1) Classification and Regression Tree (CART):
+			- Binary Decision Tree 
+			– Classification (Categorical output variable) 
+			– Regression (Continuous output variable) 
+			– Uses Gini Index
+			
+		2)CHAID – CHI-squared Automatic Interaction Detector: 
+			– Non-Binary Decision Tree 
+			– Use statistical significance of proportions[Chi-Square Test]
+			
+	Gini Index Computation :
+	
+		- When there are multiple independent columns, and to find which column to use for decision tree.
+		- We need to find Gini Index for eaxh independent column seperately.
+		- Independent with highest Gini Index value will be picked for decision trees.
+		
+		- when we have continuous values in independent column
+			* Find the min value & max value of column.
+			* Initially take the centre point of min & max as criteria for splitting.
+			* then move 1 step left & compute & 1 step right & compute to find in which direction Gini Gain is increasing.
+			* move in increasing direction update the min & max , find median and repeat same step to find optimal value.
+			[Similar to Binary Searching Algo]
+			
+		{
+			For Continuous Independent Variable, different binary cutoff points are chosen and best Gini Gain cutoff is shortlisted.
+			It is overfitting the model.
+		}
+	
+		{Refer Video for Excel/Manual Computation}
+		
+		** Highly Impure Nodes Gini Index = 0.5
+		** Highly Pure Nodes Gini Index = 0
+		
+	Advantages 
+		– Easy to interpret 
+		– Automated field selection 
+		– No data processing required
+			• Variable transformation not required
+			• Can handle outliers
+			• Missing value tolerant
+	
+	Disadvantages 
+		– They are unstable 
+		– Often inaccurate and poor compared to other models (Solution – Random Forest) 
+		– Generally not preferred for continuous prediction
+		
+	Limitations
+		• Vulnerable to over-fitting
+			Solution – Pruning
+		• Greedy Algorithm
+			Solution – Cross Validation
+			
+---------------------------------------------------------------------------------------
+
+Decision Tress - Hands On
+
+# Required import
+from sklearn.tree import DecisionTreeClassifier
+
+credit_df = pd.read_csv("credit.csv")
+
+# Decision tree in Python can take only numerical / categorical colums. It cannot take string / obeject types. 
+# The following code loops through each column and checks if the column type is object then converts those columns
+# into categorical with each distinct value becoming a category or code.
+
+for feature in credit_df.columns: 
+    if credit_df[feature].dtype == 'object': 
+        credit_df[feature] = pd.Categorical(credit_df[feature]).codes
+		
+# pd.Categorical(credit_df[feature]) -> converts the data into categories 
+# pd.Categorical(credit_df[feature]).codes -> converts the data into categories and assign a code to each category
+
+# Seperate the Dependent and Independent columns
+# capture the target column ("default") into separate vectors for training set and test set
+
+X = credit_df.drop("default" , axis=1)  # Independent Columns
+y = credit_df.pop("default") # Dependent
+
+# splitting data into training and test set for independent attributes
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, train_labels, test_labels = train_test_split(X, y, test_size=.30, random_state=1)
+
+# Using DecisionTreeClassifier with Gini as criterion we will build the model.
+dt_model = DecisionTreeClassifier(criterion = 'gini' )
+
+# Model Fitting
+dt_model.fit(X_train, train_labels)
+
+# Decision Tree Construction.
+
+from sklearn import tree
+
+train_char_label = ['No', 'Yes']
+Credit_Tree_File = open('credit_tree.dot','w')
+dot_data = tree.export_graphviz(dt_model, out_file=Credit_Tree_File, feature_names = list(X_train), class_names = list(train_char_label))
+Credit_Tree_File.close()
+
+# Copy paste the content of credit_tree.dot fie to "http://webgraphviz.com/" to view the decision tree.
+
+# Regularise the Tree by pruning it.
+
+reg_dt_model = DecisionTreeClassifier(criterion = 'gini', max_depth = 7,min_samples_leaf=10,min_samples_split=30)
+reg_dt_model.fit(X_train, train_labels)
+
+credit_tree_regularized = open('credit_tree_regularized.dot','w')
+dot_data = tree.export_graphviz(reg_dt_model, out_file= credit_tree_regularized , feature_names = list(X_train), class_names = list(train_char_label))
+credit_tree_regularized.close()
+
+# Next Step is Prediction
+ytrain_predict = reg_dt_model.predict(X_train)
+ytest_predict = reg_dt_model.predict(X_test)
+
+-------------------------------------------------------------------------------
+
+Model performance Measure:
+
+	This helps to understand how good the model that we have trained using the dataset is so that we have confidence in the performance of the model for future predictions.
+	
+	1) Confusion Matrix:
+		{Refer PPT}
+		
+		Consider following Example data set with actual O/P and Predicted O/P:
+		
+			X 		Actual O/P(Y)		Predicted O/P(Y-cap)
+			
+			15			0						1				-> False Positive(FP)
+			20			1						0				-> False Negatve(FN)
+			25			1						1				-> True Positive(TP)
+			30			0						0				-> True Negative(TN)
+		
+		TP & TN -> Correct Predictions
+		FP & FN -> InCorrect Predictions
+		
+		FP -> Type 1 Error in Model
+		FN -> Type 2 Error in Model
+		
+		Sensitivity / Recall => TP / (TP + FN) 
+		Specificity => TN / (TN + FP)
+		Accuracy =>  (TP + TN)/(TP + FP + TN +FN)
+		Precision -  TP/ TP+ FP
+		
+		- Higher the accuracy stronger the prediction, lower the accuracy weaker the prediction.
+		- Higher the Sensitivity / Recall of model , lower is the Type 2 Error in Model and vice-versa.
+		- Precision describes Type 1 Error. Higher the Precision lower is the Type 1 Error in Model and vice-versa.
+		
+		Importance of Accuracy, Sensitivity & Precision:
+		
+			Case 1 : GMail server detecting spam mails and moving it to spam section.
+			
+									(Predicted)			(Predicted)
+									 Non-Spam			   Spam
+									 
+				(Actual)				TP					FN
+				Non- Spam
+				
+				(Actual)				FP					TN
+				Spam
+				
+				- If server detects Spam mail as Non-Spam it is a (FP) Type-1 Error. It won't cause major issue.
+				- If server detects Non-Spam mail as Spam it is a (FN) Type-2 Error. It will cause major issue.
+				- So in this business case Sensitivity Metrics is given more weightage. Model with higher Sensitivity is preferred.
+				
+			Case - 2 : Outlook server detecting spam mails and moving it to spam section.
+		
+				- If server detects Spam mail as Non-Spam it is a (FP) Type-1 Error. Here if we access any spam mail unknowingly it could be a security threat to the organisation.
+				- If server detects Non-Spam mail as Spam it is a (FN) Type-2 Error. It wont cause major issue when compared to above scenario.
+				- So in this business case Precision Metrics is given more weightage. Model with higher Precision is preferred.
+		
+		
+			** For a model Type-1 & Type-2 Errors are inversly proportional. If we try reducing any one other error increases.
+		
+			Case - 3: When both Type-1 Error & Type-2 errors are costlier:
+			
+				- We can go for Accuracy Metrics.
+				- We can go for F1-score.
+				- F1-score is Harmonic mean of Sensitivity & Precision.
+				- F1-score = (2 * Sensitivity * Precision)/(Sensitivity + Precision)
+				
+	2) Receiver Operating Characteristics (ROC) Curve:
+	
+		{refer PPT}
+		- Larger the Area Under the Curve better is the model.
+		
+-------------------------------------------------------------------------------------
+
+Model Performance - Hands - on:
+
+# AUC and ROC for the training data
+
+
+# predict probabilities
+probs = reg_dt_model.predict_proba(X_train)
+
+# keep probabilities for the positive outcome only
+probs = probs[:, 1]
+
+# calculate AUC
+from sklearn.metrics import roc_auc_score
+auc = roc_auc_score(train_labels, probs)
+print('AUC: %.3f' % auc)
+
+# calculate roc curve
+from sklearn.metrics import roc_curve
+fpr, tpr, thresholds = roc_curve(train_labels, probs)
+plt.plot([0, 1], [0, 1], linestyle='--')
+
+# plot the roc curve for the model
+plt.plot(fpr, tpr, marker='.')
+
+# show the plot
+plt.show()
+
+
+--------------------------------------------
+# AUC and ROC for the test data
+
+
+# predict probabilities
+probs = reg_dt_model.predict_proba(X_test)
+
+# keep probabilities for the positive outcome only
+probs = probs[:, 1]
+
+# calculate AUC
+from sklearn.metrics import roc_auc_score
+auc = roc_auc_score(test_labels, probs)
+print('AUC: %.3f' % auc)
+
+# calculate roc curve
+from sklearn.metrics import roc_curve
+fpr, tpr, thresholds = roc_curve(test_labels, probs)
+plt.plot([0, 1], [0, 1], linestyle='--')
+
+# plot the roc curve for the model
+plt.plot(fpr, tpr, marker='.')
+
+# show the plot
+plt.show()
+----------------------------------------------
+from sklearn.metrics import classification_report,confusion_matrix
+
+# For Training data
+print(classification_report(train_labels, ytrain_predict))
+
+confusion_matrix(train_labels, ytrain_predict)
+
+reg_dt_model.score(X_train,train_labels) # Accuracy value
+
+
+# For Test data
+print(classification_report(test_labels, ytest_predict))	
+
+confusion_matrix(test_labels, ytest_predict)
+
+reg_dt_model.score(X_test,test_labels) # Accuracy value
+
+---------------------------------------------------------------------------------------------
+Mentor Session:
+
+Overfitting -> Training Accuracy 100%
+{Decision tree extending till reaching pure nodes as terminal nodes}
+
+Under Fitting ->  Training Accuracy 100%
+{Restriting Decision tree to lesser levels}
+
+probab of prediction -> tells probability of current value being '0' and current value being '1'
+		

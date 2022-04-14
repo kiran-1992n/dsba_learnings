@@ -1,0 +1,175 @@
+Random Forest:
+
+	- Random Forest technique is an ensemble technique wherein we construct multiple models and take the average output of all the models to take final decision/make prediction.
+	
+	- When we are building a single model we are not taking into consideration different entities I/P for prediction.
+	- When we do a Ensemble methord we don't depend on single model. We construct multiple models and take average of all the models for final prediction.
+	
+	Ensemble learning:
+
+		• Machine learning technique that combines several basemodels in order to produce one optimal predictive model.
+		• Weak classifiers
+		• Different set of variables for each classifier
+		• Combine into singleprediction
+	
+	* For constructing multiple models/decision trees using same dataset we go for boot strapped dataset:
+		- Pick the samples randomly from given dataset and use it for model buiding.
+		- Random samples with rows replacement.
+		- Random subset of X variables. {say we have X1, X2, X3, X4 independent colmns in Dataset, out of these we create multiple subsets and use it for model building.}
+		
+	Desirable Properties of Each Decision Tree:
+		- The Prediction strength of every individual tree must be high.
+		- The decision trees must not be correlated to each other.
+		
+	Basic idea ofrandom forest:
+		* Draw multiple random samples, with replacement, from the data
+			• (this sampling approach is called the bootstrap).
+		* Using a random subset of predictors at each stage, fit a classification (or regression) tree to each sample (and thus obtaina “forest”).
+		* Combine the predictions/classifications from the individual trees to obtain improved predictions.
+		* Use voting for classification and averaging for prediction.
+		
+	Steps in random forest algorithm :
+		Step1 – create a bootstrapped dataset
+		Step2 – create a decision tree using boot strapped dataset. But only use a random subset of variables at eachstep
+		Step3 – repeat the same and create multiple trees
+		
+	Out of bag data points:
+		• When we create a bootstrapped dataset, ~1/3 of the original data does not end up in the boot strapped dataset
+		• This is called out-of-bag dataset
+		
+---------------------------------------------------------------------------
+Random Forest_Hands-On:
+
+# import required modules
+from sklearn.ensemble import RandomForestClassifier
+
+bank_df = pd.read_csv("Banking Dataset.csv")
+
+# RandomForestClassifier needs all int datatype columns. No Object data type is allowed.Perform Label Encoding with numeric datatypes.
+
+# Decision tree in Python can take only numerical / categorical colums. It cannot take string / object types. 
+# The following code loops through each column and checks if the column type is object then converts those columns
+# into categorical with each distinct value becoming a category or code.
+
+for feature in bank_df.columns: 
+    if bank_df[feature].dtype == 'object':
+        bank_df[feature] = pd.Categorical(bank_df[feature]).codes 
+		
+# Seperate Dependent & Independent Variables
+X = bank_df.drop(["Target","Cust_ID"] , axis=1)
+y = bank_df.pop("Target")
+
+# splitting data into training and test set for independent attributes
+from sklearn.model_selection import train_test_split
+X_train, X_test, train_labels, test_labels = train_test_split(X, y, test_size=.30, random_state=1)
+
+rfcl = RandomForestClassifier(n_estimators = 501, oob_score = True) 
+# n_estimators -> Number of trees we intend to buid. 
+# oob_score -> Set this variable to True to compute Out Of Bag Score.
+
+rfcl = rfcl.fit(X_train, train_labels)
+
+rfcl.oob_score_ # Give the oob score
+
+# The pruning properties which we had in Decision trees can be used here.
+# If we are not sure with one particular optimal value for each parameter we can pass list of values as follows and it picks optimal value.
+
+# Construct a dic with all required values.
+param_grid = {
+    'max_depth': [7, 10], # Depth of Decision Tree
+    'max_features': [4, 6], # Number of columns randomly selected for decision making.
+    'min_samples_leaf': [50, 100], # Min number of samples to be present on each leaf.
+    'min_samples_split': [150, 300], # Min number of samples to be required for splitting.
+    'n_estimators': [301, 501] # Number of Decision Trees to be constructed
+}
+
+# Using GridSearchCV construct Random forest
+rfcl = RandomForestClassifier()
+grid_search = GridSearchCV(estimator = rfcl, param_grid = param_grid, cv = 3) # cv -> cross validation
+
+# In above dict we have 2 values for each key and total 5 keys so (2 power 5) 32 different combinations we have.
+# Since we have set cv = 3 each combination is evaluated 3 trimes with randomly selected data.
+# So total 32 * 3 = 96 times it is evaluated to compute the optimal combination.
+
+grid_search.fit(X_train, train_labels)
+
+# To view the optimal values for each parameter
+grid_search.best_params_ # dict with 5 keys as above and each key aving optimal/beat value as it's value.
+
+# Extract the best grit with thest optimal values 
+best_grid = grid_search.best_estimator_
+
+# Predict for both test & Train data using extracted grid.
+ytrain_predict = best_grid.predict(X_train)
+ytest_predict = best_grid.predict(X_test)
+
+# Evaluation of Model.
+from sklearn.metrics import confusion_matrix,classification_report
+
+# Cofusion Matrix & Classification Matrix for Test data
+confusion_matrix(test_labels,ytest_predict)
+print(classification_report(test_labels,ytest_predict))
+
+# Cofusion Matrix & Classification Matrix for Train data
+confusion_matrix(train_labels,ytrain_predict)
+print(classification_report(train_labels,ytrain_predict))
+
+import matplotlib.pyplot as plt
+
+# AUC and ROC for the training data
+
+# predict probabilities
+probs = best_grid.predict_proba(X_train)
+# keep probabilities for the positive outcome only
+probs = probs[:, 1]
+# calculate AUC
+from sklearn.metrics import roc_auc_score
+auc = roc_auc_score(train_labels, probs)
+print('AUC: %.3f' % auc)
+# calculate roc curve
+from sklearn.metrics import roc_curve
+fpr, tpr, thresholds = roc_curve(train_labels, probs)
+plt.plot([0, 1], [0, 1], linestyle='--')
+# plot the roc curve for the model
+plt.plot(fpr, tpr, marker='.')
+# show the plot
+plt.show()
+
+
+# AUC and ROC for the test data
+
+
+# predict probabilities
+probs = best_grid.predict_proba(X_test)
+# keep probabilities for the positive outcome only
+probs = probs[:, 1]
+# calculate AUC
+from sklearn.metrics import roc_auc_score
+auc = roc_auc_score(test_labels, probs)
+print('AUC: %.3f' % auc)
+# calculate roc curve
+from sklearn.metrics import roc_curve
+fpr, tpr, thresholds = roc_curve(test_labels, probs)
+plt.plot([0, 1], [0, 1], linestyle='--')
+# plot the roc curve for the model
+plt.plot(fpr, tpr, marker='.')
+# show the plot
+plt.show()
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------
+Mentor Session:
+
+	- Randomness in Random Forest:
+
+		1) Bootstrap easy for selecting sample rows randomly.
+		2) Randomly selecting 'k' columns out of 'n' columns at each stage for decision making.
+
+	- Greediness in Decision Trees is overcome / removed in Random Forest.
+	since we select only  'k' columns out of 'n' columns at each stage for decision making.

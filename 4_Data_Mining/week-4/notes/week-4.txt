@@ -1,0 +1,258 @@
+Artificial Neural Network:
+
+	- Similar to a biological neural network, an Artificial Neural Network has the ability to learn, generalize and adapt. 
+	- It is made of 3 layers-Input, Hidden and Output layer.
+	- Black Box Technique.
+	
+	- A Machine Learning algorithm that is roughly modelled around what is currently known about how the human brain functions.
+	
+	Understanding neural network:
+	
+		* Models the relationship between a set of input signals and an output.
+		* Similar to a biological brain response to stimuli from sensory inputs.
+		* The brain uses a network of interconnected cells called neurons to provide learning capability
+		* ANN uses a network of artificial neurons or nodes to solve challenging learning problems
+		
+	Why learn neural networks?
+	
+		1) Ability to learn
+			• Neural Networks figure out how to perform their function on their own.
+			• Determine their function based only upon sample inputs.
+			
+		2) Ability to generalize
+			• Produce outputs for inputs it has not been taught how to deal with.
+			
+		3) Adaptivity – can be easily retrained to changing environmental conditions.
+		
+	Neural network architechture:
+
+		• Made of layers with many interconnected nodes (neurons)
+		• There are three main layers, specifically
+			– Input Layer
+			– Hidden Layer
+			– Output Layer
+		• Hidden Layer can be one or more
+		
+	How is the synaptic weights of neurons determined?
+	{refer pdf}
+	
+	Backward error propagation
+	{refer pdf}
+	
+---------------------------------------------------------------------------------------------------
+ANN  Hands-on:
+
+# import required modules
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plot
+from sklearn.neural_network import MLPClassifier
+
+bank=pd.read_csv("bank.csv")
+
+# Drop the columns which are not required for model building.
+bank = bank.drop(['ID','ZIP_Code'], axis=1)
+
+# Seggregating Dependent & Independent colmns
+y = bank['Personal_Loan']
+x = bank.drop(['Personal_Loan'], axis=1)
+
+# Training and testing samples
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(x,y, test_size= 0.30, random_state=27)
+
+# Scale the data before feeding it to model
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+
+x_train = sc.fit_transform(x_train) # Scaling train data.
+
+x_test = sc.transform(x_test) # Scaling test data.
+# Here we have to use only transform. We have already fitted the data using mean & std dev of training info.
+
+# Build MLP Classifier function
+clf = MLPClassifier(hidden_layer_sizes=100, max_iter=5000, solver='sgd', verbose=True,  random_state=21,tol=0.01)
+
+# hidden_layer_sizes -> Number of neurons to be present at each layer of hidden layer.(if it is single layer we enter integer value.)
+# For a multi-layers of hidden layer we set this value as a tuple (100,100,100) (3 layers with each layer having 100 neurons.)
+
+# max_iter -> Max number of iterations which a model is allowed to take for updating the synaptic weights
+# solver -> The solving function used to calculate the optimal weights. Here used function is 'sgd' stochastic gradient descent.
+# verbose -> True is to print print the output.
+# tol -> Calculating the o/p at each iteration and the diff b/w iterations is less than this threshold value continuously for 10 iterations to stop the
+# iteration.(Higher the tolerance value like 0.01 lesser iterations to converge, lower tolerance like 0.00000001 higher iterations to converge)
+
+clf.fit(x_train, y_train)
+y_pred = clf.predict(x_test)
+
+### Here we can use GridSearch by passing multiple values to each parameter and allow model to select best params.
+
+# Model Evaluation
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix,classification_report
+
+# For test data
+confusion_matrix(y_test, y_pred)
+
+print(classification_report(y_test, y_pred))
+
+# AUC and ROC for the test data
+
+# predict probabilities
+probs = clf.predict_proba(x_test)
+# keep probabilities for the positive outcome only
+probs = probs[:, 1]
+# calculate AUC
+from sklearn.metrics import roc_auc_score
+auc = roc_auc_score(y_test, probs)
+print('AUC: %.3f' % auc)
+# calculate roc curve
+from sklearn.metrics import roc_curve
+fpr, tpr, thresholds = roc_curve(y_test, probs)
+plt.plot([0, 1], [0, 1], linestyle='--')
+# plot the roc curve for the model
+plt.plot(fpr, tpr, marker='.')
+# show the plot
+plt.show()
+
+
+
+# For Train data
+pred2 = clf.predict(x_train)
+confusion_matrix(y_train,pred2)
+
+print(classification_report(y_train, pred2))
+
+# AUC and ROC for the training data
+
+# predict probabilities
+probs = clf.predict_proba(x_train)
+# keep probabilities for the positive outcome only
+probs = probs[:, 1]
+# calculate AUC
+from sklearn.metrics import roc_auc_score
+auc = roc_auc_score(y_train, probs)
+print('AUC: %.3f' % auc)
+# calculate roc curve
+from sklearn.metrics import roc_curve
+fpr, tpr, thresholds = roc_curve(y_train, probs)
+plt.plot([0, 1], [0, 1], linestyle='--')
+# plot the roc curve for the model
+plt.plot(fpr, tpr, marker='.')
+# show the plot
+plt.show()
+
+---------------------------------------------------------------------------------------------------
+End to End Case Study:
+
+### Here we will build 3 different models -> DecisionTree, Random-Forest and ANN for same dataset and conclude the best Model. 
+
+import numpy as np
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
+
+hr_df = pd.read_csv("HR_Employee_Attrition_Data.csv")
+
+# Dropping unwanted columns for Model Building
+hr_df.drop(['EmployeeCount', 'EmployeeNumber'],axis=1,inplace=True)
+
+# Seperating Dependent & Independent columns
+X = hr_df.drop("Attrition" , axis=1)
+y = hr_df.pop("Attrition")
+
+# splitting data into training and test set for independent attributes
+from sklearn.model_selection import train_test_split
+X_train, X_test, train_labels, test_labels = train_test_split(X, y, test_size=.30, random_state=1)
+
+################### Decision Tree Classifier
+
+dt_model = DecisionTreeClassifier(criterion = 'gini' )
+dt_model.fit(X_train, train_labels)
+
+# To view Trees
+from sklearn import tree
+train_char_label = ['No', 'Yes']
+HR_Tree_File = open('d:\hr_tree.dot','w')
+dot_data = tree.export_graphviz(dt_model, out_file=HR_Tree_File, feature_names = list(X_train), class_names = list(train_char_label))
+HR_Tree_File.close()
+
+# Use Grid search to find Optimal Values for tree building
+from sklearn.model_selection import GridSearchCV
+
+param_grid = {
+    'max_depth': [7, 8, 9, 10],
+    'min_samples_leaf': [15, 20, 25],
+    'min_samples_split': [45, 60, 75]
+}
+dt_model = DecisionTreeClassifier()
+grid_search = GridSearchCV(estimator = dt_model, param_grid = param_grid, cv = 3)
+
+grid_search.fit(X_train, train_labels)
+grid_search.best_params_
+best_grid = grid_search.best_estimator_
+
+ytrain_predict = best_grid.predict(X_train)
+ytest_predict = best_grid.predict(X_test)
+
+from sklearn.metrics import classification_report
+print(classification_report(train_labels,ytrain_predict))
+print(classification_report(test_labels,ytest_predict))
+
+################### Random Forest Classifier
+
+from sklearn.model_selection import GridSearchCV
+
+param_grid = {
+    'max_depth': [7, 8],
+    'max_features': [11, 12, 13],
+    'min_samples_leaf': [20, 25],
+    'min_samples_split': [60, 75],
+    'n_estimators': [101, 301]
+}
+rfcl = RandomForestClassifier()
+grid_search = GridSearchCV(estimator = rfcl, param_grid = param_grid, cv = 3)
+
+grid_search.fit(X_train, train_labels)
+grid_search.best_params_
+best_grid = grid_search.best_estimator_
+
+ytrain_predict = best_grid.predict(X_train)
+ytest_predict = best_grid.predict(X_test)
+
+print(classification_report(train_labels,ytrain_predict))
+print(classification_report(test_labels,ytest_predict))
+
+################### MLP Classifier (Artificial Neural Network)
+
+# Scale the data before Model building
+from sklearn.preprocessing import StandardScaler 
+sc = StandardScaler() 
+X_trains = sc.fit_transform(X_train) 
+X_tests = sc.transform (X_test)
+
+param_grid = {
+    'hidden_layer_sizes': [(100,100,100)],
+    'activation': ['logistic', 'relu'],
+    'solver': ['sgd', 'adam'],
+    'tol': [0.1,0.01],
+    'max_iter' : [10000]
+}
+rfcl = MLPClassifier()
+grid_search = GridSearchCV(estimator = rfcl, param_grid = param_grid, cv = 3)
+
+grid_search.fit(X_trains, train_labels)
+grid_search.best_params_
+best_grid = grid_search.best_estimator_
+
+ytrain_predict = best_grid.predict(X_trains)
+ytest_predict = best_grid.predict(X_tests)
+
+print(classification_report(train_labels,ytrain_predict))
+print(classification_report(test_labels,ytest_predict))
+
+
+
+
+

@@ -1,0 +1,446 @@
+Data Mining:
+
+	- Data Mining categorically falls under predictive analytics and is fundamentally associated with information discovery in databases. 
+	- Data Mining aims at finding useful patterns from large data sets in an attempt to make data more informative and qualitatively insightful.
+	- Algorithms in Data Mining is classified into:
+	
+		Supervised Learning:
+			- We decide the rule of the game.
+			- We can Control both Input & Output.[ We decide what can be I/P and O/P]
+			
+			- Ex: Predicting Salary of a Professional by having access to data like scholastic performance, age, gender, school, Academic Institutions,     	
+			  Deography, Tier of the Institution and so on.
+				- Here Salary is O/P variable dependent on other I/P variables
+				- Establist relation b/w I/p & O/P by defining weights to Inputs 
+			
+		Unsupervised Learning:
+			- We have control only over Input.
+			- Ex: Building Marketing Strategies
+			
+---------------------------------------------------------------------------------
+
+Introduction to Machine Learning:
+
+	Steps to solve a ML Problem:
+	
+		1) Identify/Understand the business problem.
+		
+		2) Acquiring data or data collection.
+			# Understanding about data sources : 
+				* Primary Data Sources
+				* Secondary Data Sources.
+			# Understanding about data types : 
+				* Qualitative data 
+				* Quantitative data 
+					. Continuous
+						- Ratio Scaled [ML Algo's understand this]
+						- Interval Scaled [ML don't Algo's understand this] [Example: Temperature 0 degree centigrade , 0 degree Farenheit]
+					. Discrete
+						- Categorical [Ex: City colmn]
+						- Binary : Only 2 possible Values [Ex : Gender colmn]
+						- Ordinal : [Ex: Rank colmn]
+						
+		{Pre-Processing or Prepration of Data for Analysis} Step 3 & 4
+		
+		3) Cleaning of Data
+			# Handling the Missing Data
+				* Remove entire row of data
+				* Drop Entire Column if there are toomany missing data in it
+				* Impute/Replace the Data
+					. Use Measures of Central Tendancy
+					. Use Prediction Models [K-nearest neighbours model]
+					. Special Cases of Imputation
+			# Handling the Outliers
+				* Detection of Outliers
+					. Uni-variate Outlier detection Methords 
+						- Boxplot
+					. Bi-variate Outlier detection Methords 
+						- Scatter Plot
+					. Multi-variate Outlier detection Methords 
+						- Residual Analysis
+						- Cook's distance methord
+				* Decision what to do with Outliers
+					. Remove Outliers
+					. Retain Outliers
+					. Impute Outliers 
+					
+		4) Transforming the Data
+			Standardisation or Normalisation of Data so that all the values across different columns are similar.
+			# Statistical Transformation : For Distance Based Models[Clustering Techniques, K-nn] & Weight Based Models[Neural Networks].
+				* Z-Score Scaling
+				* Min-Max Normalisation
+			# Non-Statistical Transformation : Data Conversions
+				* Qualitative -> Quantitative
+				* Discrete -> Continuous
+		
+		{
+			Sample & Population:
+			
+				- Whatever data we have access to is treated as sample.
+				- Predictions we try to do using the sample is about the Population or part of Population.
+				
+				"Using the known Sample trying to figureout what is happening to unknown observations is all about Predictions."
+		}
+		
+		5) Visualising Data
+			- It is all about Sample Analysis.
+			- Measures of Central Tendancy & Measures of Dispersion.
+		
+		6) Model Data
+			# Model Selection
+				Types of Models:
+				* Descriptive Modeling
+					. Its all about Data Visualisation
+					
+				{Study of Population using Samples is broad concept of following 2 models}
+				
+				* Inferential Modeling
+					. More of Statistical Analysis.
+					. Study/Analyse Population parameters like mean, median, mode, Std Deviation, Variance by looking at Sample's mean, median, mode, Std  Deviation, Variance
+					. Ex : 
+						1)Test of Means : ANOVA, 1-sample t-test, 1-sample z-test, 2-sample t test.
+						2)Test of Proportions : Chi-Square Test
+						3)Test of Normality: Shapiro's Test
+						4)Test of Variance: Levene's Test
+					. Any model where Hypothesis is involved (Null & Alternate Hypothesis) it is Inferential Modeling.
+					
+				* Predictive Modeling
+					. It is the study/analysis of unknown observations using samle observations.
+					. Data Mining Techniques. They are generally applied to large datasets.
+					. Data Minig can be classified into :
+						- Supervised
+							Here Dependent variable is either Continuous(Regression is used) or Discrete(Classification is used) 
+							a) Regression
+								-> When the prediction that needs to be done is Continuous.
+							b) Classification
+								-> When the prediction that needs to be done is either Binary or Discrete.
+							{For both Regression & Classification based Problems}
+							-- Decision Trees
+							-- Random Forest
+							-- Neural Networks
+						- UnSupervised
+							There is no Dependent variable.
+							a) Association Rules
+								-> Probability based.
+								-> Also called Market Basket Analysis.
+								-> Used for Reccomendations. 
+							b) Clustering 
+								-> Distance based calculations
+								1) Hierarchical Clusters
+								2) Non-Hierarchical Clusters
+							
+			# Model Building
+			# Model Evaluation
+		
+		7) Gathering Insights
+		
+	Supervised v/s Un-Supervised Learning:
+	
+		1)Dependent & Independent variables are part of DataSet		Independent variables are only part of DataSet.
+		2)Train and test cycles are available						There is just I/P data and model gives O/P which we need to Analyse.
+		3)Model Evaluation are directly available					Qualitative in nature or Indirect in nature.
+						
+---------------------------------------------------------------------------------
+
+Clustering Types & Distance Measures:
+
+	What is Unsupervised Learning?
+		- No defined Dependent & Independent VAriables.
+		- Patterns in data are used to Identify/Group Similar observations.
+		
+	Supervised Learning:
+		- Clearly defined X (Independent) & Y(dependent) variable
+		- Predict a Continuous Response(Regression)
+		- Categorical Response(Classification)
+		
+	Un-Supervised Learning:
+		- Unlabelled data
+		- Emerging patterns based on similarity Identified.
+		- Clustering, Association Rules.
+		
+	What is Clustering?
+		- Grouping of Objects.
+		- Heteroginity b/w groups.
+		- Homoginity within groups.
+		- SSB > SSW {Sum of Squares Between groups > Sum of Squares Within groups}
+		Between Group Variance > Within Group Variance
+			* Inter Cluster distances are maximised
+			* Intra Cluster distances are minimised
+			
+	Why do we Cluster?
+		- Group Records such that
+			* similar to one another within the same cluster.
+			* Dissimilar to the objects in other clusters.
+		- Clustering Results are used:
+			* As a stand-alone tool to get insight into data distribution 
+			* Visualisation of clusters may unveil important information
+			* As a pre-processing step for other algos.
+			
+	Cluster Analysis - Use Cases:
+		- Image Processing
+			* Cluster images based on the visual content.
+		- Web
+			* Cluster groups of users based on their access patterns on webpages.
+			* Cluster web pages based on their content.
+		- Market Segmaentation:
+			* Customers are segmented based on their demographic and transaction history info and a marketing strategy is tailored for each segment.
+		- Market Structure Analysis
+			* Identifying group of similar products according to competative measures of similarity.
+		- Finance
+			* For creating balanced portfolios
+			
+	Clustering v/s PCA
+		- Clustering - Segment variables according to the distance b/w them. (among rows)
+		- PCA - Grouping variables that relate to each other. (among columns)
+		
+	Measuring Similarities - Distances:
+		- Eucledian distance
+			* Distance b/w 2 points (x1,y1) & (x2,y2) is under-root[(x2-x1)square + (y2-y1)square]
+		- Manhattan distance
+			* Distance between the projection of points on the axis.
+			* Distance b/w 2 points (x1,y1) & (x2,y2) is abs(x2-x1) + abs(y2-y1)
+		- Chebyshev distance
+			* Distance b/w 2 points (x1,y1,z1) & (x2,y2,z2) is max(abs(x2-x1),abs(y2-y1),abs(z2-z1))
+			
+	Types of Clustering:
+		# Hierarchical
+			* Agglomerative
+				- Bottom up Approach.
+				- Start with a Assumption that each object forming a seperate group.
+				- It keeps on merging objects or groups that are close to one another.
+				-  Works very well in identifying Small Clusters
+			* Divisive
+				- Top down approach
+				- Start with all of the objects in the same cluster.
+				- A cluster is split up into smaller clusters.
+				- Works very well in identifying Large Clusters but is not very good at identifying Small Clusters
+		# Non-Hierarchical(Partitioning)
+			* K-means
+				- Constructs 'k' partition of data.
+				- Each partition will represent a cluster and k<=n
+				
+---------------------------------------------------------------------------------
+
+Hierarchical Clusters:
+
+	- Records are sequentially grouped to create clusters, based on distance between records and distance between clusters.
+	- Also produces a useful graphical display of the clustering process and results, called a dendogram.
+	
+	Strengths of Hierarchical Clusters:
+		- No assumptions on number of clusters.
+		- Any desired number of clusters can be obtained by cutting the dendogram at proper level.
+		- It may correspond to meaningful taxonomies.
+		
+	Disadvantages of Hierarchical Clusters:
+		- Time Complexity : not suitable for larger datasets.
+		- Very sensitive to outliers.
+		
+	Hierarchical Clustering Steps:
+		- Star with 'n' clusters where each record will be a cluster.
+		- Two closest records are merged into a cluster.
+		- At every step, 2 closest clusters with smallest distance are merged.
+			-- Either single records are added to existing clusters or
+			-- Two existing clusters are merged.
+		- Repeat till there is a single cluster that includes all the records.
+		
+	Hierarchical Clustering - Distance between clusters:
+		-Linkage types
+			* Single Linkage
+				Distance b/w 2 clusters is defined as the shortest dis b/w two points in each cluster.
+				L(r,s) = min(D(xri,xsj))
+			* Complete Linkage
+				Distance b/w 2 clusters is defined as the longest dis b/w two points in each cluster.
+				L(r,s) = max(D(xri,xsj))
+			* Average Linkage
+				Distance b/w 2 clusters is defined as the average dis b/w each point in one cluster to every point in the other cluster.
+			* Centroid Linkage
+				-- Based on centroid distance. Clusters are represented by their mean values for each variable, which forms a vector of means. 
+				-- Dist b/w 2 clusters is dis b/w 2 vectors.
+			* Ward's Methord
+			
+	Dendograms:
+		- A dendogram is a treelike diagram that summarises the process of clustering.
+		- On the x-axis are records.
+		- Similar records are joined by lines whose vertical length reflects the dis b/w the records.
+		- The greater the diff in height, the more dissimilarity
+		- By choosing a cutoff distance on the y-axis a set of clusters is created.
+		- If the difference in the height of the vertical lines of the dendrogram is small then the clusters that are formed will be similar.
+		
+---------------------------------------------------------------------------------
+
+Hierarchical Clusters Hands-On:
+
+# import necessary package 
+from scipy.cluster.hierarchy import dendrogram, linkage
+
+wardlink = linkage(data, method = 'ward') # data here is a DF with only continuous variables
+dend = dendrogram(wardlink) # Plots the Dendogram with different colors assigned to suggest different clusters.
+
+# With a large data set too many merges will be shown in Dendogram. We can truncate it 
+
+dend = dendrogram(wardlink, truncate_mode='lastp',p = 10,) # Here we get only last '10' merges in dendogram
+
+# Suppose we intend to group the clusters based on our requirement
+
+from scipy.cluster.hierarchy import fcluster
+
+# Here we intend to group data into 3 clusters so 3, criterion='maxclust'
+#Method 1
+clusters = fcluster(wardlink, 3, criterion='maxclust')
+clusters
+
+# Here we intend to group data into clusters based on the distance = 23 . So 23, criterion='distance'
+# {At distance = 23 draw a horizontal line. Number of vertical lines intersected by this horizontal line gives number of clusters.}
+# Method 2
+clusters = fcluster(wardlink, 23, criterion='distance')
+clusters
+
+df['clusters'] = clusters # Assigning cluster id/value to DF
+
+---------------------------------------------------------------------------------
+
+K-Means Clustering:
+
+	- A non-hierarchical approach to form good clusters is to pre-specify a desired number of clusters,k
+	- Assign each record to one of the k clusters, according to their distance from each other.
+	- So as to minimise a measure of dispersion within the clusters.
+	- The 'means' in K-means refers to averaging of the data that is finding the centroid.
+	- K-means clustering is widely used in large dataset applications.
+	
+	How does k-means clustering work?
+	
+		1) Specify value of 'k'
+		2) Partition dataset to k initial clusters with random centroid to each cluster.
+		3) Assign each record to cluster with nearest centroid.
+		4) Recalculate centroid for losing and receiving clusters.
+		5) Do reassignments occur ? If YES repeat step-3
+		6) Else Finalize clusters.
+		
+By default which distance is measured in the K Means? Eucledian
+ 		
+---------------------------------------------------------------------------------
+
+Scaling Techniques:
+
+	- If the variance for 1 colmn is large and variance for other colmn is small we go for Min-Max scaling.
+	- If the variances for different colmns are almost same and only Magnitude varies, we go for Z-score scaling.
+	
+	Where Scaling is used?
+	
+		* K-means 
+		* K-nearest neighbours
+		* PCA
+		* Perceptrons, Neural Networks
+
+---------------------------------------------------------------------------------
+
+Validating Clusters:
+
+	- The resulting clusters should be valid to generate insights.
+	- Cluster interpretability
+	- Cluster stability
+	- Cluster seperation
+	- Number of Clusters
+
+---------------------------------------------------------------------------------
+
+Silhoutte score for K-means clustering : 
+
+	- Indirect model evaluation techniques which we can verify once clustering procedures are completed namely the K-means model which is distance based.
+	- Verifying weather records are mapped to clusters correctly based on distances.
+	
+	* Take any record from a cluster.
+	* Find its distance from the cluster (to which it belongs) centroid as 'a'.
+	* Find the distance between record and the neighbouring cluster's centroid as 'b'.
+	* Compute Silhoutte width as (b-a)/max(a,b) if the value is positive it means record is mapped to cluster properly.
+	* If the value is negative it means record is not mapped to cluster properly.
+	
+	- Silhoutte width value varies from -1 to +1
+	- Silhoutte score is the average of Silhoutte width's of all the records.
+	- Silhoutte score positive means clustering is done properly, If it is negative it means clustering is not done properly.
+	- If the Final Silhouette score is close to zero, then it means: Clusters are not well separated from each other (Similar)
+	
+---------------------------------------------------------------------------------
+
+K-means Hands-On:
+
+# import required model
+from sklearn.cluster import KMeans 
+
+# Create a new DF with only continuous columns
+cust_df = data_df.drop(['Name','Cust_ID'], axis=1)
+
+# Scaling the data
+from sklearn.preprocessing import StandardScaler
+X = StandardScaler()
+scaled_df = X.fit_transform(cust_df)
+
+# K-means Clustering
+
+# For k = 2
+k_means = KMeans(n_clusters = 2)
+k_means.fit(scaled_df)
+k_means.labels_
+k_means.inertia_ # Total Within Sum of Squares
+
+# For k = 1
+k_means = KMeans(n_clusters = 1)
+k_means.fit(scaled_df)
+k_means.inertia_
+# Here inertia value will be very high
+
+# For k = 3
+k_means = KMeans(n_clusters = 3)
+k_means.fit(scaled_df)
+k_means.inertia_
+
+# For k = 4
+k_means = KMeans(n_clusters = 4)
+k_means.fit(scaled_df)
+k_means.inertia_
+
+# For k = 5
+k_means = KMeans(n_clusters = 5)
+k_means.fit(scaled_df)
+k_means.inertia_
+
+# Inertia drop from k=1 to k=2 and k=2 to k=3 is very significant when compared to 3 to 4 & 4 to 5 is less significant.
+# So we consider k=3 as optimal
+# The same is concluded using visualization.
+
+wss =[] 
+for i in range(1,11):
+    KM = KMeans(n_clusters=i)
+    KM.fit(scaled_df)
+    wss.append(KM.inertia_)
+	
+plt.plot(range(1,11), wss)
+
+# from the above plot it is evident drop in inertia/WSS value after k=3 is less significant.
+# So optimal value for k is 3.
+
+
+# Final Cluster Creation with k =3 
+k_means = KMeans(n_clusters = 3)
+k_means.fit(scaled_df)
+labels = k_means.labels_
+
+# Assigning cluster id to original DF
+data_df["Clus_kmeans"] = labels
+
+
+# Verification Of Cluster Creation
+from sklearn.metrics import silhouette_samples, silhouette_score
+
+silhouette_score(scaled_df,labels) # Average of all silhouette widths.
+
+sil_width = silhouette_samples(scaled_df,labels)
+data_df["sil_width"] = sil_width # Assigning it with original DF
+
+silhouette_samples(scaled_df,labels).min() # Should be positive.
+
+** Now apply Descriptive Analytics on Each cluster and derive Insights.
+
+---------------------------------------------------------------------------------
+** Clusters created here based on Hierarchical or Non-Hierarchical(Clustering) ways are further analysed to extract valuable Info or Insights can be derived from Clusters throurh descriptive analysis .
+---------------------------------------------------------------------------------
