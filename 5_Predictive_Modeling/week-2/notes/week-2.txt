@@ -1,0 +1,117 @@
+Logistic Regression:
+
+	- Also known as Logit , Maximum-Entropy classifier, is a supervised learning method for classification. 
+	- Target  / Dependent variables here are catagorical in nature i.e. it can take only integral values representing different classes
+	- It establishes relation between dependent class variable and independent variables using regression
+	- The probabilities describing the possible outcomes of a query point are modeled using a logistic function.
+	- There are two broad categories of Logistic Regression algorithms
+		a. Binary Logistic Regression when dependent variable is strictly binary
+		b. Multinomial Logistic Regression when the dependent variable has multiple categories. There are two types of Multinomial Logistic Regression
+			I. Ordered Multinomial Logistic Regression (dependent variable has ordered values) like low, medium , high
+			II. Nominal Multinomial Logistic Regression (dependent variable has unordered categories)
+			
+	Regularised Models:
+		- Models which are built in such a way that it is not over fit.
+
+----------------------------------------------------------------------
+Building Blocks of Logistic Regression:
+	
+	{refer pdf}
+	
+	- When we call the fit function by passing Dependent and Independent values, LR model learns from the training set a vectors of weights and bias. Each weight (wi) is assigned to one input feature Xi.
+	- Logistic regression internally uses Linear Regression to come up with Z = w.x + b.
+	- Since the weights are running numbers and so is the bias term, Z can take values from – infinity to + infinity.
+	- To transform the value of Z into probability, Z is passed through Sigmoid function.
+	
+	
+	- Usually we build models to predict non normal behaviour like:
+		- getting affected from cancer
+		- Customer becoming a defaulter
+		- Person who is diabetic.
+	- In the given dataset records representing non normal behaviour will be less in number compared to records representing normal behaviour.
+	- We usually assign 1 to area of interest to us (non normal behaviour) and 0 to other (normal behaviour)
+
+----------------------------------------------------------------------
+Learning Process:
+
+	{refer pdf}
+	
+	Log Loss function is used to find best sigmoid curve.
+
+Assumptions:
+
+	{refer pdf}
+	
+Evaluating Logistic Regression Models:
+
+	{refer pdf}
+	
+	Confusion Matrix, Accuracy, Sensitivity /  Recall, Specificity, Precision
+	
+	** While calling confusion matrix function pass y(actual values) as 1st parameter and y-cap(predicted values) as 2nd parameter.
+	- In the output Actual will be rows & predicted will be columns.
+	- Class of interest is non-normal behaviour so it is represented as '1' 
+
+Applications:
+
+	{refer pdf}
+
+Pro's And Con's
+
+	{refer PDF}
+	
+----------------------------------------------------------------------
+Hands-On
+
+# import required model
+from sklearn.linear_model import LogisticRegression
+
+# To check if all the values are numeric
+pima_df[~pima_df.applymap(np.isreal).all(1)]
+	
+#Lets analysze the distribution of the various attributes
+pima_df.describe().transpose()
+
+# Let us look at the target column which is 'class' to understand how the data is distributed amongst the various values
+pima_df.groupby(["class"]).count()
+
+sns.pairplot(pima_df , hue='class' , diag_kind = 'kde')
+
+{Pair Plot explaination refer video}
+
+array = pima_df.values
+X = array[:,0:7] # select all rows and first 8 columns which are the attributes
+Y = array[:,8]   # select all rows and the 8th column which is the classification "Yes", "No" for diabeties
+test_size = 0.30 # taking 70:30 training and test set
+seed = 7  # Random numbmer seeding for reapeatability of the code
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=test_size, random_state=seed)
+type(X_train)
+
+# Fit the model on original data i.e. before upsampling
+model = LogisticRegression()
+model.fit(X_train, y_train)
+y_predict = model.predict(X_test)
+model_score = model.score(X_test, y_test)
+
+print(model_score)
+print(metrics.confusion_matrix(y_test, y_predict))
+print(metrics.classification_report(y_test, y_predict))
+
+cm = metrics.confusion_matrix(y_test, y_predict)
+plt.clf()
+plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Wistia)
+classNames = ['NonDiabetic', 'Diabetic']
+plt.title('Confusion Matrix - Test Data')
+plt.ylabel('Actual label')
+plt.xlabel('Predicted label')
+tick_marks = np.arange(len(classNames))
+plt.xticks(tick_marks, classNames, rotation=45)
+plt.yticks(tick_marks, classNames)
+s = [['G1', 'G2'], ['G1','G2']]
+ 
+for i in range(2):
+    for j in range(2):
+        plt.text(j,i, str(s[i][j])+" = "+str(cm[i][j]))
+plt.show()
+
+	

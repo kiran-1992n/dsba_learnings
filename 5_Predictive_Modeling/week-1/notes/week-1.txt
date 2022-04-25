@@ -1,0 +1,368 @@
+Predictive Modeling:
+
+	Here we will be going through:
+	
+	- Linear Regression
+	- Logistic Regression
+	- Discriminant Analysis
+	
+		Linear & Logistic are about establishing Mathematical Equation b/w I/p and O/P variable.
+		In linear Regression we are expecting an outcome which is linear.(continuous)
+		In Logistic Regression we are expecting an catagorical outcome.
+		
+	Linear Discriminant Analysis (LDA)
+		It is a dimentionality reduction Technique where we try to express a feature as a combination of features.
+		It is similar to ANOVA. In ANOVA Outcome was linear in nature and Independent variables are Catagorical in nature.
+		In LDA Outcome is Catagorical in nature and Independent variables are linear in nature.
+		
+-------------------------------------------------------------------------
+Linear Regression: Supervised Learning Methord
+
+	Intoduction to Linear Regression:
+	
+		Preview:
+		
+			Model:
+				- Every model represent certain processes in real world.
+				- Processes could be Tangible process(1-Predict miles per gallon of a car, given attributes of a car 2-Predicting behaviour of a Machinary when it may go to a repair) or Intangible process(1-Predicting the stock price 2-customer behaviour).
+				- Predict how the process is going to behave in future using these models. Using this info we could take necessary steps to handle bad situations.
+				
+			
+			Process:
+				- Is a set of well-defined steps that take certain well-defined I/P 'X' and these steps transform them into well-defined O/P 'O'.
+				- O = P(X) ==> Similar to a function in Mathematical form y = f(X) 
+				- y -> Target variable
+				- X -> Independent / predictive variable.
+			
+			Sample:
+				- Dataset used to build a model.
+				- Obtained from the universe.
+				
+			Difference b/w Sample & Universe:
+				- Universe is always under flux(It is constantly changing.)
+				- Sample is a snapshort of universe(It is a constant , it won't change)
+				
+			Errors in Prediction:
+				- The difference b/w the model prediction and actual outcome.
+				- It is combination of Biase Error + Variance Error + Random Error
+				- These errors cannot be removed we need to mitigate it and keep it as low as possible to get RightFit Model / Generalised model.
+				- Random Errors are not under our control. RightFit Model is one one which has control over Bias & Variance Errors.
+				
+		Linear Regression:
+		
+			- The term "regression" generally refers to predicting a real number.
+			- The term "linear" in the name “linear regression” refers to the fact that the method models data with linear
+			  combination of the explanatory variables. 
+			- A linear combination is an expression where one or more variables are scaled by a constant factor and added
+			  together. 
+			- In the case of simplest linear regression with a single explanatory variable, the linear combination used in
+			  linear regression can be expressed as:
+			  
+				Dependent variable value =( weight * independent variable ) + constant
+				
+			- It is the straight line in the scatter plot of the variables
+			
+----------------------------------------------------------------------
+How Linear Regression Model is Built :
+
+	1) Collect data from the Universe which we call sample.
+	2) Establish reliability of data does it match the process in the Universe - By performing Hypothesis Test.
+	3) Before we create a linear model, we need to ensure the independent variable influences the dependent
+		variable. The influence is technically called correlation.
+		
+	{Refer pdf}
+	
+	correlation = co-variance / Std Dev
+	
+	Pearson’s coefficient ranges from: -1 t0 +1
+	Gradient Descent method uses partial derivatives on the slope and intercepts to ________ sum of squared errors. : Minimize
+	
+	
+----------------------------------------------------------------------
+Best-Fit Line:
+
+		We try to represent given data in following form:
+			y = mX + c
+				
+			y -> Dependent Varriable
+			X -> Independent variable(s)
+			m -> weights
+			
+		After building a model:
+			y-cap = mX + c
+			
+			y-cap -> O/P predicted by model.
+			X -> Independent variable(s)
+			m -> weights
+			
+		{Refer pdf}
+		
+		- The line that represents the model may not touch all the points in the scatter plot.
+		- The vertical distance between a point and the line (shown in yellow) is the error in prediction of the model. {refer pdf for image}
+		- The line which gives least sum of squared errors across all the data points put together is considered as the best line.
+		The best fit line will always go through that point in the features space where the Xbar (blue vertical line) and ybar (blue horizontal line) meet. {refer pdf for image}
+		
+		{refer pdf}
+		
+		SSE -> Sum of Squared Errors -> (y-cap - y) raised to power 2 for all data points.
+		
+		MSSE -> Mean Sum of Squared Errors -> SSE/n where 'n' is number of datapoints.
+		
+		A Bestfit line is one which has least MSSE.
+	
+	Co-Efficient of determinents (r-square):
+		- Coefficient of determinant – determines the fitness of a linear model. The closer the points get to the line, the
+			R^2 (coeff of determinant) tends to 1, the better the model is
+				
+		{refer pdf}
+		
+	Which line is called the Best Fit Line?
+		The line which gives the least sum of squared errors across all data points put together
+		
+	The closer the points get to the line, the coefficient of determination tends to 1, the better the model is.
+----------------------------------------------------------------------
+Structure of Linear Regression:
+	
+	{refer pdf}
+----------------------------------------------------------------------
+Ordinary least square method and Gradient descent method:
+
+	{refer pdf}
+----------------------------------------------------------------------
+Hands-On
+
+# Import Linear Regression machine learning library
+from sklearn.linear_model import LinearRegression
+
+# reading the CSV file into pandas dataframe
+mpg_df = pd.read_csv("car-mpg.csv")  
+
+# drop the car name column as it is useless for the model
+mpg_df = mpg_df.drop('car_name', axis=1)
+
+# Target Variable is 'mpg'
+
+# Replace the numbers in categorical variables with the actual country names in the origin col
+mpg_df['origin'] = mpg_df['origin'].replace({1: 'america', 2: 'europe', 3: 'asia'})
+
+# Convert categorical variable into dummy/indicator variables. As many columns will be created as distinct values
+# This is also kown as one hot coding. The column names will be America, Europe and Asia... with one hot coding
+mpg_df = pd.get_dummies(mpg_df, columns=['origin'])
+
+#Lets analysze the distribution of the dependent (mpg) column
+mpg_df.describe().transpose()
+
+######################################### EDA - Start #############################################################################
+
+mpg_df.dtypes
+# Note:  HP column is missing the describe output. That indicates something is not right with that column
+
+#Check if the hp column contains anything other than digits 
+# run the "isdigit() check on 'hp' column of the mpg_df dataframe. Result will be True or False for every row
+# capture the result in temp dataframe and dow a frequency count using value_counts()
+# There are six records with non digit values in 'hp' column
+
+temp = pd.DataFrame(mpg_df.hp.str.isdigit())  # if the string is made of digits store True else False  in the hp column 
+# in temp dataframe
+
+temp[temp['hp'] == False]   # from temp take only those rows where hp has false
+
+# On inspecting records number 32, 126 etc, we find "?" in the columns. Replace them with "nan"
+#Replace them with nan and remove the records from the data frame that have "nan"
+mpg_df = mpg_df.replace('?', np.nan)
+
+#Let us see if we can get those records with nan
+mpg_df[mpg_df.isnull().any(axis=1)]
+
+# There are various ways to handle missing values. Drop the rows, replace missing values with median values etc. 
+
+#of the 398 rows 6 have NAN in the hp column. We will drop those 6 rows. Not a good idea under all situations
+#note: HP is missing becauses of the non-numeric values in the column. 
+#mpg_df = mpg_df.dropna()
+
+#instead of dropping the rows, lets replace the missing values with median value. 
+mpg_df.median()
+
+# replace the missing values in 'hp' with median value of 'hp' :Note, we do not need to specify the column names
+# every column's missing value is replaced with that column's median respectively  (axis =0 means columnwise)
+#mpg_df = mpg_df.fillna(mpg_df.median())
+
+mpg_df = mpg_df.apply(lambda x: x.fillna(x.median()),axis=0)
+
+mpg_df['hp'] = mpg_df['hp'].astype('float64')  # converting the hp column from object / string type to float
+
+######################################### EDA-End  #############################################################################
+
+# Copy all the predictor variables into X dataframe. Since 'mpg' is dependent variable drop it
+X = mpg_df.drop('mpg', axis=1)
+X = X.drop({'origin_america', 'origin_asia' ,'origin_europe'}, axis=1)
+
+# Copy the 'mpg' column alone into the y dataframe. This is the dependent variable
+y = mpg_df[['mpg']]
+
+#Let us break the X and y dataframes into training set and test set. For this we will use
+#Sklearn package's data splitting function which is based on random function
+from sklearn.model_selection import train_test_split
+
+# Split X and y into training and test set in 75:25 ratio
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30 , random_state=1)
+
+# invoke the LinearRegression function and find the bestfit model on training data
+regression_model = LinearRegression()
+regression_model.fit(X_train, y_train)
+
+# Printing 'm' values
+
+# Let us explore the coefficients for each of the independent attributes
+for idx, col_name in enumerate(X_train.columns):
+    print("The coefficient for {} is {}".format(col_name, regression_model.coef_[0][idx]))
+	
+# Printing 'c' value
+
+# Let us check the intercept for the model
+intercept = regression_model.intercept_[0]
+print("The intercept for our model is {}".format(intercept))
+
+# Model Score
+regression_model.score(X_train, y_train)
+regression_model.score(X_test, y_test)
+
+###############################################################################################################################
+###############################################################################################################################
+
+# R^2 is not a reliable metric as it always increases with addition of more attributes even if the attributes have no 
+# influence on the predicted variable. Instead we use adjusted R^2 which removes the statistical chance that improves R^2
+# Scikit does not provide a facility for adjusted R^2... so we use 
+# statsmodel, a library that gives results similar to
+# what you obtain in R language
+# This library expects the X and Y to be given in one single dataframe
+
+######################################## Using Stats Model Library With Statistical Outputs ###################################
+
+data_train = pd.concat([X_train, y_train], axis=1)
+
+import statsmodels.formula.api as smf
+lm1 = smf.ols(formula= 'mpg ~ cyl+disp+hp+wt+acc+yr+car_type', data = data_train).fit()
+lm1.params # prints all m values and  c value.
+
+print(lm1.summary())  #Inferential statistics
+
+----------------------------------------------------------------------
+Hypothesis testing for linear Regression:
+
+	{Refer pdf}
+	
+	Null Hypothesis : Thesre is no correlation b/w o/p variable and any I/P colmn
+	
+	** Columns / Dimensions having 'p' value < 0.05 means reject Null Hypothesis => Those columns are strong predictors others with 'p' value > 0.05 are poor predictors. 
+	
+----------------------------------------------------------------------
+Hands-On - Continue
+
+# Let us check the sum of squared errors by predicting value of y for test cases and 
+# subtracting from the actual y for the test cases
+mse = np.mean((regression_model.predict(X_test)-y_test)**2)
+
+# underroot of mean_sq_error is standard deviation i.e. avg variance between predicted and actual
+import math
+math.sqrt(mse)
+
+# predict mileage (mpg) for a set of attributes not in the training or test set
+y_pred = regression_model.predict(X_test)
+
+# Since this is regression, plot the predicted y value vs actual y values for the test data
+# A good model's prediction will be close to actual leading to high R and R2 values
+plt.scatter(y_test['mpg'], y_pred)
+
+# ------------------------------------------------- ITERATION 2  ---------------------------------------------------
+# All the data is scaled using zscore technique and then a model is built
+
+from scipy.stats import zscore
+X_train_scaled  = X_train.apply(zscore)
+X_test_scaled = X_test.apply(zscore)
+y_train_scaled = y_train.apply(zscore)
+y_test_scaled = y_test.apply(zscore)
+
+# invoke the LinearRegression function and find the bestfit model on training data
+regression_model = LinearRegression()
+regression_model.fit(X_train_scaled, y_train_scaled)
+
+# Print m values
+
+# Let us explore the coefficients for each of the independent attributes
+for idx, col_name in enumerate(X_train.columns):
+    print("The coefficient for {} is {}".format(col_name, regression_model.coef_[0][idx]))
+
+# Print c value
+
+intercept = regression_model.intercept_[0]
+print("The intercept for our model is {}".format(intercept))
+
+# Model score
+regression_model.score(X_test_scaled, y_test_scaled)
+
+# Let us check the sum of squared errors by predicting value of y for training cases and 
+# subtracting from the actual y for the training cases
+mse = np.mean((regression_model.predict(X_test_scaled)-y_test_scaled)**2)
+
+# underroot of mean_sq_error is standard deviation i.e. avg variance between predicted and actual
+import math
+math.sqrt(mse)
+
+# predict mileage (mpg) for a set of attributes not in the training or test set
+y_pred = regression_model.predict(X_test_scaled)
+
+# Since this is regression, plot the predicted y value vs actual y values for the test data
+# A good model's prediction will be close to actual leading to high R and R2 values
+plt.scatter(y_test_scaled['mpg'], y_pred)
+
+** Z-scoreing the data will eliminate 'intercept' / c-value.(c-value we get here is too less, near to 0) 
+** m value changes
+** Accuraacy scores remain same.
+
+----------------------------------------------------------------------
+Assumptions In Linear Regression
+
+	{refer pdf}
+
+Is Homoscedasticity the same regardless of the value of X? => Yes
+When there is perfect collinearity between predictor variables, the scatter plot is a line. => True
+
+----------------------------------------------------------------------
+Multi Colinearity:
+
+	When we have multiple I/P colmns. And there is a correlation b/w them it has effect on o/p 'm' values & 'c' values.
+	PCA is one good soln to eliminate Multi Colinearity problem.
+	
+	Structural multicollinearity: 
+		This type occurs when we create features from existing features and build a model
+		using all of the features. For example, using “Radius” and “Area” as two variables.
+		
+	Data multicollinearity: 
+		This type of multicollinearity is an artifact of the data itself. The nature of the variables is
+		such that they correlate. For e.g. in auto-mpg.csv, the columns “weight” and “horsepower” of a car will correlate
+		positively. In case there are such correlating variables in the data, they may be combined into a composite
+		variable using techniques such as PCA.
+		
+	{refer pdf}
+		
+	Hands-On
+	
+	from statsmodels.stats.outliers_influence import variance_inflation_factor
+	
+	vif = [variance_inflation_factor(X.values, ix) for ix in range(X.shape[1])] 
+	
+	i=0
+	for column in X.columns:
+		if i < 11:
+			print (column ,"--->",  vif[i])
+			i = i+1
+	
+
+	
+	
+
+		
+		
+	
+	
