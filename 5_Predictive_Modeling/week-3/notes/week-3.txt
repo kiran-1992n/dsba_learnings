@@ -1,0 +1,80 @@
+Linear Discriminant Analysis:
+
+	Discriminant Analysis
+		- Discriminant Analysis is used for classifying observations to a class or category based on predictor (independent) variables of the data.
+		- Discriminant Analysis creates a model to predict future observations where the classes are known.
+		
+		Popular types of Discriminant Analysis
+			1) Linear Discriminant Analysis (LDA)
+			2) Quadratic Discriminant Analysis (QDA)
+			
+	Linear Discriminant Analysis:
+
+		- It is a Classification Technique.
+		- LDA uses linear combinations of independent variables to predict the class in the response variable of a given observation.
+		
+		- LDA assumes that the independent variables (p) are normally distributed(continuous & numeric) and there is equal variance / covariance for the classes. 
+		- LDA is popular, because it can be used for both classification and dimensionality reduction.
+		
+		- When these assumptions are satisfied, LDA creates a linear decision boundary. 
+		- Note that based on many research study, it is observed that LDA performs well when these assumptions are violated.
+		
+		- “linear discriminant analysis frequently achieves good performances in the tasks of face and object recognition, even though the assumptions of common covariance matrix among groups and normality are often violated (Duda, et al., 2001)” (Tao Li, et al., 2006).
+		- LDA is based upon the concept of searching for a linear combination of predictor variables that best separates the classes of the target variable.
+		
+	{refer PDF}
+	
+----------------------------------------------------------------------------------------------
+When LDA is used?
+
+	LDA comes to our rescue in situations where logistic regression is unstable when
+		* classes are well separated - Logistic Regression lacks stability when the classes are wellseparated. That’s when LDA comes in.
+		* the data is small
+		* we have more than two classes- LDA is a better choice whenever multi-class classification is required and in the case of binary classifications, both logistic regression and LDA are applied.
+
+----------------------------------------------------------------------------------------------
+How LDA Works:
+
+How are LDA models represented?
+
+How does an LDA make predictions
+
+	{refer PDF}
+	
+	What is the main goal of LDA? -> To project features in higher dimensional space onto lower-dimensional space
+	
+-----------------------------------------------------------------------------------------------
+Hands- On
+
+import scipy.stats as stats
+
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.metrics import confusion_matrix
+from sklearn.preprocessing import scale
+
+# Load DF
+
+# Perform EDA
+
+# Convert Object type Feature to Numeric type for Linear Discriminant Analysis
+
+# Seperate Dependent & Independent Variables
+X = np.asmatrix(data_df[['Gender','LoanOffered','Job','WorkExp','CreditScore','EMIRatio','CreditHistory','Ownhouse','Purpose','Dependents']])
+X = scale(X)
+Y = np.asarray(data_df[['Status']])
+
+# Build LDA Model
+# Refer details for LDA at http://scikit-learn.org/stable/modules/generated/sklearn.discriminant_analysis.LinearDiscriminantAnalysis.html
+clf = LinearDiscriminantAnalysis()
+model=clf.fit(X,Y)
+model
+
+# Predict it
+pred_class = model.predict(X)
+data_df['Prediction'] = pred_class 
+
+# Check Correlation b/w numeric variables
+# Refer on correlation at https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.corr.html
+data= data_df[['Gender','LoanOffered','Job','WorkExp','CreditScore','EMIRatio','CreditHistory','Ownhouse','Purpose','Dependents']]
+Cor1 = data.corr()
+Cor1
