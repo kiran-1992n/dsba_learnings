@@ -1,0 +1,157 @@
+Machine Learning:
+-----------------
+
+	Naive Bayes:
+	
+		Probability Review:
+		
+			• If A is any event, then the complement of A, denoted by , is the event that A does not occur.
+			• The probability of A is represented by P(A), and the probability of its complement P(A-bar) = 1 – P(A).
+			
+			• Let A and B be any events with probabilities P(A) and P(B).
+				• If you are told that B has occurred, then the probability of A might change. The new probability of A is called the conditional probability of A given B.
+				• Conditional probability: P(A|B) = P(A and B) / P(B)
+				• Multiplication rule: P(A and B) = P(A|B) P(B)
+			
+			** In Above example A & B are not independent events. {A -> Roll over a die and get '1' ;; B -> Roll over a die and get an odd number} 
+			
+			For Independent events:
+			
+			{A -> Roll over die-1 and get '1' ;; B-> Roll over die-2 and get '1' }
+			
+			• Probabilistic independence means that knowledge of one event is of no value when assessing the probability of the other.
+			• The main advantage to knowing that two events are independent is that in that case the multiplication rule simplifies to: P(A and B) = P(A) P(B).
+			
+			Bayes’ Rule:
+			
+				• P(A|B), reads “A given B,” represents the probability of A if B was known to have occurred.
+				• In many situations we would like to understand the relation between P(A|B) and P(B|A).
+				
+				P(A|B) = P(B|A)*P(A) / P(B)
+				
+			Bayes’ Rule Cont:
+			
+				• In words, Bayes’ rule says that the posterior is the likelihood times the prior, divided by a sum of likelihoods times priors. 
+				
+				P(A|B) = P(B|A)P(A) / P(B)
+				
+				Posterior Probability = (Conditional Probability * Prior Probability) / evidence
+				
+				Same formulae can be extended for multiple independent 'B' events.
+				
+	{Refer Pdf}
+	
+###################################################################################################################
+
+Hands On
+
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+import matplotlib.pyplot as plt       # matplotlib.pyplot plots data
+%matplotlib inline 
+
+import seaborn as sns
+
+pdata = pd.read_csv("pima-indians-diabetes.csv")
+
+# EDA Performed
+
+# Split the data to train & test dataset
+from sklearn.model_selection import train_test_split
+X = pdata.drop('class',axis=1)     # Predictor feature columns (8 X m)
+Y = pdata['class']   # Predicted class (1=True, 0=False) (1 X m)
+x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=1)
+
+# Impute 0's in the dataet using the mean value.
+from sklearn.impute import SimpleImputer
+rep_0 = SimpleImputer(missing_values=0, strategy="mean")
+cols=x_train.columns
+x_train = pd.DataFrame(rep_0.fit_transform(x_train))
+x_test = pd.DataFrame(rep_0.fit_transform(x_test))
+x_train.columns = cols
+x_test.columns = cols
+
+# using Gaussian algorithm from Naive Bayes
+from sklearn.naive_bayes import GaussianNB 
+# create the model
+diab_model = GaussianNB()
+diab_model.fit(x_train, y_train.ravel())
+
+# Training data Model Performance
+diab_train_predict = diab_model.predict(x_train)
+from sklearn import metrics
+print("Model Accuracy: {0:.4f}".format(metrics.accuracy_score(y_train, diab_train_predict)))
+print()
+
+# Testing data Model Performance
+diab_test_predict = diab_model.predict(x_test)
+from sklearn import metrics
+print("Model Accuracy: {0:.4f}".format(metrics.accuracy_score(y_test, diab_test_predict)))
+print()
+
+
+print("Confusion Matrix")
+cm=metrics.confusion_matrix(y_test, diab_test_predict, labels=[1, 0])
+df_cm = pd.DataFrame(cm, index = [i for i in ["1","0"]],
+                  columns = [i for i in ["Predict 1","Predict 0"]])
+plt.figure(figsize = (7,5))
+sns.heatmap(df_cm, annot=True)
+				
+###################################################################################################################
+
+K-Nearest Neighbors:
+
+{refer pdf n video}
+
+###################################################################################################################
+
+Hands On
+
+%matplotlib inline 
+import numpy as np
+import pandas as pd
+from scipy.stats import zscore
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+
+bcData = pd.read_csv("wisc_bc_data.csv")
+
+# Have Y as catagorical column
+bcData['diagnosis'] = bcData.diagnosis.astype('category')
+
+# Split X & Y also drop unwanted columns
+bcData = bcData.drop(labels = "id", axis = 1)
+
+X = bcData.drop(labels= "diagnosis" , axis = 1)
+y = bcData["diagnosis"]
+
+# Scale the data
+XScaled  = X.apply(zscore)  
+XScaled.describe()
+
+# Split X and y into training and test set in 70:30 ratio
+X_train, X_test, y_train, y_test = train_test_split(XScaled, y, test_size=0.30, random_state=1)
+
+# Build KNN model
+NNH = KNeighborsClassifier(n_neighbors= 5 , weights = 'distance' ) # n_neighbors -> number of neighbours
+NNH.fit(X_train, y_train)
+
+# Model performance
+predicted_labels = NNH.predict(X_test)
+NNH.score(X_test, y_test)
+
+# Confusion matrix
+from sklearn import metrics
+print("Confusion Matrix")
+cm=metrics.confusion_matrix(y_test, predicted_labels, labels=["M", "B"])
+df_cm = pd.DataFrame(cm, index = [i for i in ["M","B"]],
+                  columns = [i for i in ["Predict M","Predict B"]])
+plt.figure(figsize = (7,5))
+sns.heatmap(df_cm, annot=True)
+
+###################################################################################################################
+Choosing K - value:
+

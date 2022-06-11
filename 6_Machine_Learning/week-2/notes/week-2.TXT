@@ -1,0 +1,126 @@
+{Refer PDF}
+
+-------------------------------------
+Hands - On
+
+from sklearn import metrics
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+
+creditData = pd.read_csv("credit.csv")
+
+# Data clean Up & EDA
+
+# Convert all object columns to catagorical
+for feature in creditData.columns: # Loop through all columns in the dataframe
+    if creditData[feature].dtype == 'object': # Only apply for columns with categorical strings
+        creditData[feature] = pd.Categorical(creditData[feature])
+
+# Look into the unique values present in each columns, Assign numeric values to each unique value in an order
+# Ex : {"critical": 1, "poor":2 , "good": 3, "very good": 4,"perfect": 5}
+
+replaceStruct = {
+                "checking_balance": {"< 0 DM": 1, "1 - 200 DM": 2 ,"> 200 DM": 3 ,"unknown":-1},
+                "credit_history": {"critical": 1, "poor":2 , "good": 3, "very good": 4,"perfect": 5},
+                "savings_balance": {"< 100 DM": 1, "100 - 500 DM":2 , "500 - 1000 DM": 3, "> 1000 DM": 4,"unknown": -1},
+                "employment_duration": {"unemployed": 1, "< 1 year": 2 ,"1 - 4 years": 3 ,"4 - 7 years": 4 ,"> 7 years": 5},
+                "phone":     {"no": 1, "yes": 2 },
+                "default":     {"no": 0, "yes": 1 } 
+                    }
+oneHotCols=["purpose","housing","other_credit","job"]
+
+creditData=creditData.replace(replaceStruct)
+creditData=pd.get_dummies(creditData, columns=oneHotCols)
+
+
+# Seperate X & y
+X = creditData.drop("default" , axis=1)
+y = creditData.pop("default")
+
+# Split test & train data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.30, random_state=1)
+
+# Build Decision tree Model
+dTree = DecisionTreeClassifier(criterion = 'gini', random_state=1)
+dTree.fit(X_train, y_train)
+
+# Checking Scores / Model Performance
+print(dTree.score(X_train, y_train))
+print(dTree.score(X_test, y_test))
+
+{Graph visualization code in IPYNB file}
+
+# Earlier model built was overfitted model. So let us prune the tree. Regularization
+dTreeR = DecisionTreeClassifier(criterion = 'gini', max_depth = 3, random_state=1)
+dTreeR.fit(X_train, y_train)
+print(dTreeR.score(X_train, y_train))
+print(dTreeR.score(X_test, y_test))
+
+# To Get the importance of each feature in decision making.
+print (pd.DataFrame(dTreeR.feature_importances_, columns = ["Imp"], index = X_train.columns))
+
+####################################################################################################
+dTree -> Overfitted tree with max depth
+dTreeR -> pruned tree with depth = 3
+####################################################################################################
+
+##### Ensemble Learning - Bagging
+from sklearn.ensemble import BaggingClassifier
+bgcl = BaggingClassifier(base_estimator=dTree, n_estimators=50,random_state=1)
+# base_estimator -> base classifier t be used to uild models
+# n_estimators -> number of different models to be built
+
+{Here we can either use simple models or complex models.  Models becoing overfitted with usage of complex models will not have effect on final model here.}
+
+bgcl = bgcl.fit(X_train, y_train)
+
+# Model Score
+print(bgcl.score(X_test , y_test))
+
+
+##### Ensemble Learning - AdaBoosting
+from sklearn.ensemble import AdaBoostClassifier
+abcl = AdaBoostClassifier(n_estimators=10, random_state=1)
+# Here we can specify base_estimator if required.
+# Since we haven't specified in this case, default decision tree with depth = 1 (simplest) model will be used. 
+
+abcl = abcl.fit(X_train, y_train)
+print(abcl.score(X_test , y_test))
+
+
+
+##### Ensemble Learning - GradientBoost
+from sklearn.ensemble import GradientBoostingClassifier
+gbcl = GradientBoostingClassifier(n_estimators = 50,random_state=1)
+# Here default decision tree with depth = 1 (simplest) model will be used.
+
+gbcl = gbcl.fit(X_train, y_train)
+print(gbcl.score(X_test, y_test))
+
+
+##### Ensemble RandomForest Classifier
+
+{Difference b/w RandomForest & Bagging is in RandomForest tree building activity in each stage only subset of independent columns are taken into consideration}
+
+from sklearn.ensemble import RandomForestClassifier
+rfcl = RandomForestClassifier(n_estimators = 50, random_state=1,max_features=12)
+rfcl = rfcl.fit(X_train, y_train)
+# Here default decision tree used will be complex one. If we specify lower value for 'max_depth' each tree becomes simple.
+# Forest with simple trees will have lower accuracy / Score.
+
+print(rfcl.score(X_test, y_test))
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+- Data Imbalance can be in X {Ex:gender} & Y .
+
+- Data Imbalance will be problem for Neural Networks.
+- Data Imbalance will not be problem for Logistic regression, Regression
+
+- Data Balancing Techniques:
+	* OverSampling (Popular & Preferred)
+	* Under Sampling (Unpopular & Not preferred)
+
+
+
+

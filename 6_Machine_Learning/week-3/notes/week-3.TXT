@@ -1,0 +1,191 @@
+Sentiment Analysis Hands On:
+
+
+# Corpus required for processing is available in nltp package
+import nltk
+from nltk.corpus import movie_reviews
+
+nltk.download('movie_reviews') # for first time
+
+# To find the number of files we are working with / number files in corpus
+movie_reviews.fileids()
+len(movie_reviews.fileids())
+
+# View the content of the individual file in corpus as a raw text.
+movie_reviews.raw(movie_reviews.fileids()[2])
+
+# View the content of the individual file in corpus as a list of words in sequential order.
+movie_reviews.words(movie_reviews.fileids()[2])
+
+# To get the list of words present in corpus along with it's frequency of distribution.
+nltk.FreqDist(movie_reviews.words())
+
+#To get top 30
+nltk.FreqDist(movie_reviews.words()).most_common(30)
+
+# StopWords are also present in nltk package
+nltk.download('stopwords') # for first time
+
+# For tokenization
+nltk.download('punkt') # for first time
+
+all_words=[]
+def lower(x):
+    for w in x.words():
+        words=w.lower()
+        all_words.append(words)
+        
+lower(movie_reviews)
+all_words
+
+# Remove the stopwords and puntuations
+import string
+stopwords=nltk.corpus.stopwords.words('english')+list(string.punctuation) # stopwords and puntuations in a single list.
+
+# Cleaning , Removing stopwords from our all_words
+all_words_clean=[x for x in all_words if x not in stopwords]
+
+# Frequency Distribution of cleaned words
+all_words_freq=nltk.FreqDist(all_words_clean)
+all_words_freq
+
+# Get top 2000 words out of above frquency distribution
+word_features=[]
+def common_features(x):
+    for item in x.most_common(2000):
+        word_features.append(item[0])
+common_features(all_words_freq)
+word_features
+
+# Sentiment Analysis : Identify the catagory to which each record(review) in corpus(movie_reviews) belongs
+movie_reviews.categories()  # o/p ['neg','pos']
+
+# Map each review to one of the catagory
+documents=[]
+def docs(x):
+    for category in x.categories():
+        for fileid in x.fileids(category):
+            documents.append((x.words(fileid),category))
+docs(movie_reviews)
+
+# Randomise the data
+import random
+random.shuffle(documents)
+
+def document_features(document): 
+    document_words = set(document) #getting the unique number of entries in the document variable
+    features = {} #defining an empty dictionary
+    for word in word_features: #looping over the 'word_features' which has been defined in the last code block
+        features['contains({})'.format(word)] = (word in document_words) 
+		
+		#defining 'features' in  particular format and checking whether the unique elements of the input 'document'
+        #  are contained in the 'word_features' defined before
+		
+    return features
+
+# Build a feature set 
+featuresets=[]                   
+def processed(x):
+    for (d,c) in x:
+        featuresets.append((document_features(d),c))
+processed(documents)
+
+# Seperate Train & Test Set
+train_set, test_set = featuresets[100:], featuresets[:100]
+
+# Train Naive Bayes classifier
+classifier = nltk.NaiveBayesClassifier.train(train_set)
+
+# Model Accuracy
+print(nltk.classify.accuracy(classifier,test_set))
+
+# Get Most informative features
+classifier.show_most_informative_features(20)
+
+## Sample o/p : It tells ratio of catagories also.
+contains(outstanding) = True        pos : neg    =     10.8 : 1.0
+contains(mulan) = True              pos : neg    =      8.8 : 1.0
+contains(seagal) = True             neg : pos    =      8.4 : 1.0
+
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+Text Mining Analysis Hands-On:
+
+# Import Required Modules
+import numpy as np
+import pandas as pd
+import nltk
+from nltk.stem.snowball import SnowballStemmer
+import json
+import re
+import string
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+# nltk.download('stopwords')
+# nltk.download('punkt')
+
+# Remove the stopwords and puntuations
+import string
+stopwords=nltk.corpus.stopwords.words('english')+list(string.punctuation) # stopwords and puntuations in a single list.
+
+# Stemming
+stemmer = SnowballStemmer("english")
+
+def myTokenizer(text):
+    temp_tokens = [word for word in nltk.word_tokenize(text)]
+    tokens = []
+    for token in temp_tokens:
+        if re.search('[a-zA-Z]', token):
+            tokens.append(token)
+    ret_tokens = [stemmer.stem(t) for t in tokens]
+    return ret_tokens
+	
+# Above function does tokenising, stemming & remove numeric digits.
+
+tfidf_vectorizer = TfidfVectorizer(max_df=0.8, max_features=200000,
+                                 min_df=0.2, stop_words=stopwords,
+                                 use_idf=True, tokenizer=myTokenizer, ngram_range=(1,1))
+
+tfidf_matrix = tfidf_vectorizer.fit_transform(synopses)
+terms = tfidf_vectorizer.get_feature_names()
+
+# max_df -> Word occurance should be in max of 80% of documents
+# min_df -> Word occurance should be in min of 20% of documents
+# max_features -> Number of features requires.
+# stop_words -> stop words that should not be considered.
+# ngram_range -> treating howmany words a 1 (Unigram, bigram, trigram, multigram)
+
+## Hierarchical document clustering
+from sklearn.metrics.pairwise import cosine_similarity
+dist = 1 - cosine_similarity(tfidf_matrix)
+
+import matplotlib.pyplot as plt
+from scipy.cluster.hierarchy import ward, dendrogram
+
+linkage_matrix = ward(dist) #define the linkage_matrix using ward clustering pre-computed distances
+
+fig, ax = plt.subplots(figsize=(15, 20)) # set size
+ax = dendrogram(linkage_matrix, orientation="right", labels=titles);
+
+plt.tick_params(\
+    axis= 'x',          # changes apply to the x-axis
+    which='both',      # both major and minor ticks are affected
+    bottom=False,      # ticks along the bottom edge are off
+    top=False,         # ticks along the top edge are off
+    labelbottom=False)
+
+plt.tight_layout() #show plot with tight layout
+
+#uncomment below to save figure
+plt.savefig('ward_clusters.png', dpi=200) #save figure as ward_clusters
+
+
+#Great Learning best institute learn @data science.
+
+
+
+
+
+
