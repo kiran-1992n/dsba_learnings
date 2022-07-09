@@ -1,0 +1,93 @@
+Hands-On
+--------
+
+# Required Modules
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from statsmodels.tsa.seasonal import seasonal_decompose
+
+# Read the data 
+df1 = pd.read_csv('AirPassenger.csv')
+
+# We are providing inputs to tell pandas that we are trying to work with time series.
+df1 = pd.read_csv('AirPassenger.csv', parse_dates = ['Year-Month'])
+
+# It is recommended that we make our time series reference as the index
+df1 = pd.read_csv('AirPassenger.csv', parse_dates = ['Year-Month'], index_col = 'Year-Month')
+
+# We can conveniently do slicing i.e. obtain data for a specific time period.
+df1['1951-04-01':'1952-03-01']
+
+# We can check values corresponding to a specific time point
+df1.loc['1960-05-01']
+
+# Plot the time series
+df1.plot()
+plt.show()
+
+# Increase the figure size
+from pylab import rcParams
+rcParams['figure.figsize'] = 12, 8
+df1.plot()
+plt.show()
+
+# Decompose the time series additively
+df1_add_decompose = seasonal_decompose(df1, model = 'additive', period = 12)
+df1_add_decompose.plot()
+plt.show()
+
+# Decompose the time series multiplicatively
+df1_mul_decompose = seasonal_decompose(df1, model = "multiplicative")
+df1_mul_decompose.plot()
+plt.show()
+
+# Flatten Error tells which way of decomposition is correct.
+# Additively / Multiplicatively
+
+# Let's try to do log transformation
+df1_log = df1.copy()
+df1_log['Pax'] = np.log(df1)
+
+# Visualize the log transformed series
+df1_log.plot()
+plt.show()
+
+#Compare with the original series
+plt.subplot(2,1,1)
+plt.title('Original Time Series')
+plt.plot(df1)
+
+plt.subplot(2,1,2)
+plt.title('Log Transformed Time Series')
+plt.plot(df1_log)
+plt.tight_layout()
+
+# Normal data can't be fit b/w 2 parallel lines
+# Log transformed data can be fit b/w 2 parallel lines
+
+#Let's inspect each component 
+df1_add_decompose.trend
+df1_add_decompose.seasonal
+df1_add_decompose.resid
+
+# Individual plots
+df1_add_decompose.resid.plot()
+
+---------------------------------------
+
+Downsampling 
+
+# Let's change the monthly series to quarterly. This would require aggregation.
+df1_q = df1.resample('Q').mean()
+df1_q.plot()
+
+U-Sampling
+
+# Let's change the monthly series to daily. 
+df1_d = df1.resample('D').ffill() # forward fill -> Same data is conidered for full month (every day)
+df1_d.plot()
+
+# Let's change the monthly series to hourly. 
+df1_h = df1.resample('H').interpolate() # Linear values are assigned to each hour .
+

@@ -1,0 +1,329 @@
+Forecasting - Handson
+---------------------
+
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from matplotlib import pyplot as plt
+
+df = pd.read_csv("daily-total-female-births.csv")
+
+# Covert Date column from object type to datetime type.
+date = pd.date_range(start='1/1/1959', periods=len(df), freq='D')
+
+# Setting date column as an index
+df.set_index('Date',inplace=True)
+
+# Plot the Time Series data
+from pylab import rcParams
+rcParams['figure.figsize'] = 15,8
+df.plot(grid=True);
+
+# Split the data into Test & Train.
+# Here data is not split randomly.
+# First 70% data as train & last 30% as test data.
+train    =   df[0:int(len(df)*0.7)] 
+test     =   df[int(len(df)*0.7):]
+
+print(train.shape)
+print(test.shape)
+
+# Plot Test and Train data
+train['Births'].plot(fontsize=14)
+test['Births'].plot(fontsize=14)
+plt.grid()
+plt.legend(['Training Data','Test Data'])
+plt.show()
+
+## Linear Regression Model
+
+# Since we do not have Independent variable. We create a column. (It is just a number from 1 to length ...)
+train_time = [i+1 for i in range(len(train))]
+test_time = [i+256 for i in range(len(test))]
+print('Training Time instance','\n',train_time)
+print('Test Time instance','\n',test_time)
+
+# Take a copy of Train & Test data
+LinearRegression_train = train.copy()
+LinearRegression_test = test.copy()
+
+# Assigning independent column generated above.
+LinearRegression_train['time'] = train_time
+LinearRegression_test['time'] = test_time
+
+# Model building
+from sklearn.linear_model import LinearRegression
+lr = LinearRegression()
+lr.fit(LinearRegression_train[['time']],LinearRegression_train['Births'])
+
+# Plotting LR prediction
+train_predictions_model1 = lr.predict(LinearRegression_train[['time']])
+LinearRegression_train['RegOnTime'] = train_predictions_model1
+
+test_predictions_model1 = lr.predict(LinearRegression_test[['time']])
+LinearRegression_test['RegOnTime'] = test_predictions_model1
+
+plt.plot( train['Births'], label='Train')
+plt.plot(test['Births'], label='Test')
+plt.plot(LinearRegression_test['RegOnTime'], label='Regression On Time_Test Data')
+
+plt.legend(loc='best')
+plt.grid();
+
+# Model Evaluation
+from sklearn import metrics
+
+rmse_model1_test = metrics.mean_squared_error(test['Births'],test_predictions_model1,squared=False)
+print("For RegressionOnTime forecast on the Test Data,  RMSE is %3.3f " %(rmse_model1_test))
+
+## Naive Approach
+
+# For this particular naive model, we say that the prediction for tomorrow is the same as today and the prediction for day 
+# after tomorrow is tomorrow and since the prediction of tomorrow is same as today,therefore the prediction for day after tomorrow is also today.
+
+# Taking a copy of original train & test data
+NaiveModel_train = train.copy()
+NaiveModel_test = test.copy()
+
+NaiveModel_test['naive'] = np.asarray(train['Births'])[len(np.asarray(train['Births']))-1] # Taking last elements value
+NaiveModel_test['naive'].head()
+
+# Plotting Naive prediction (just a straight line)
+plt.plot(NaiveModel_train['Births'], label='Train')
+plt.plot(test['Births'], label='Test')
+
+plt.plot(NaiveModel_test['naive'], label='Naive Forecast on Test Data')
+
+plt.legend(loc='best')
+plt.title("Naive Forecast")
+plt.grid();
+
+# Model Evaluation
+rmse_model2_test = metrics.mean_squared_error(test['Births'],NaiveModel_test['naive'],squared=False)
+print("For RegressionOnTime forecast on the Test Data,  RMSE is %3.3f" %(rmse_model2_test))
+
+## Simple Average Model
+
+# Taking a copy of original train & test data
+
+SimpleAverage_train = train.copy()
+SimpleAverage_test = test.copy()
+
+# Test data prediction is Train data's mean/average value.
+SimpleAverage_test['mean_forecast'] = train['Births'].mean()
+SimpleAverage_test.head()
+
+# Plot Model prediction
+plt.plot(SimpleAverage_train['Births'], label='Train')
+plt.plot(SimpleAverage_test['Births'], label='Test')
+
+plt.plot(SimpleAverage_test['mean_forecast'], label='Simple Average on Test Data')
+
+plt.legend(loc='best')
+plt.title("Simple Average Forecast")
+plt.grid();
+
+# Model Evaluation
+rmse_model3_test = metrics.mean_squared_error(test['Births'],SimpleAverage_test['mean_forecast'],squared=False)
+print("For Simple Average forecast on the Test Data,  RMSE is %3.3f" %(rmse_model3_test))
+
+## Moving Average
+
+# For the moving average model, we are going to calculate rolling means (or moving averages) for different intervals. 
+# The best interval can be determined by the maximum accuracy (or the minimum error) over here.
+
+# Taking copy of original data
+MovingAverage = df.copy()
+MovingAverage.head()
+
+# Moving averages of few random tail's like 2,4,6,9
+MovingAverage['Trailing_2'] = MovingAverage['Births'].rolling(2).mean()
+MovingAverage['Trailing_4'] = MovingAverage['Births'].rolling(4).mean()
+MovingAverage['Trailing_6'] = MovingAverage['Births'].rolling(6).mean()
+MovingAverage['Trailing_9'] = MovingAverage['Births'].rolling(9).mean()
+MovingAverage.head()
+
+
+# Plotting 
+
+plt.plot(MovingAverage['Births'], label='Train')
+plt.plot(MovingAverage['Trailing_2'], label='2 Point Moving Average')
+plt.plot(MovingAverage['Trailing_4'], label='4 Point Moving Average')
+plt.plot(MovingAverage['Trailing_6'],label = '6 Point Moving Average')
+plt.plot(MovingAverage['Trailing_9'],label = '9 Point Moving Average')
+
+plt.legend(loc = 'best')
+plt.grid();
+
+# Visualizing only for test data
+
+trailing_MovingAverage_train=MovingAverage[0:int(len(MovingAverage)*0.7)] 
+trailing_MovingAverage_test=MovingAverage[int(len(MovingAverage)*0.7):]
+
+plt.figure(figsize=(16,8))
+plt.plot(trailing_MovingAverage_train['Births'], label='Train')
+plt.plot(trailing_MovingAverage_test['Births'], label='Test')
+
+
+plt.plot(trailing_MovingAverage_test['Trailing_2'], label='2 Point Trailing Moving Average on Test Set')
+plt.plot(trailing_MovingAverage_test['Trailing_4'], label='4 Point Trailing Moving Average on Test Set')
+plt.plot(trailing_MovingAverage_test['Trailing_6'],label = '6 Point Trailing Moving Average on Test Set')
+plt.plot(trailing_MovingAverage_test['Trailing_9'],label = '9 Point Trailing Moving Average on Test Set')
+
+plt.legend(loc = 'best')
+plt.grid();
+
+# Model Evaluation for different rolling values
+
+rmse_model4_test_2 = metrics.mean_squared_error(test['Births'],trailing_MovingAverage_test['Trailing_2'],squared=False)
+print("For 2 point Moving Average Model forecast on the Training Data,  RMSE is %3.3f" %(rmse_model4_test_2))
+
+## Test Data - RMSE --> 4 point Trailing MA
+
+rmse_model4_test_4 = metrics.mean_squared_error(test['Births'],trailing_MovingAverage_test['Trailing_4'],squared=False)
+print("For 4 point Moving Average Model forecast on the Training Data,  RMSE is %3.3f" %(rmse_model4_test_4))
+
+## Test Data - RMSE --> 6 point Trailing MA
+
+rmse_model4_test_6 = metrics.mean_squared_error(test['Births'],trailing_MovingAverage_test['Trailing_6'],squared=False)
+print("For 6 point Moving Average Model forecast on the Training Data,  RMSE is %3.3f" %(rmse_model4_test_6))
+
+## Test Data - RMSE --> 9 point Trailing MA
+
+rmse_model4_test_9 = metrics.mean_squared_error(test['Births'],trailing_MovingAverage_test['Trailing_9'],squared=False)
+print("For 9 point Moving Average Model forecast on the Training Data,  RMSE is %3.3f" %(rmse_model4_test_9))
+
+-------------------------------------------------------------------------------------------------------------------------Series
+Exponential Smoothening:
+-------------------------
+
+Single Exponential Smoothening -  α -> If the time series has no Trend nor Seasonality.
+Double Exponential Smoothening -  α for level series and β for trend series. -> If the TS has Trend but no Seasonality. {Holt model}
+Triple Exponential Smoothening -  α for level series, β for trend series and γ for seasonality -> For TS with both trend & Seasonality.{HoltWinters’ Model}
+
+-------------------------------------------------------------------------------------------------------------------------
+Exponential Smoothening - Hands On
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import statsmodels.tools.eval_measures as em
+from   sklearn.metrics import  mean_squared_error
+from   statsmodels.tsa.api import ExponentialSmoothing, SimpleExpSmoothing, Holt
+from   IPython.display import display
+from   pylab import rcParams
+
+# Importing TS data into pandas DF
+df = pd.read_csv('AirPassenger.csv',parse_dates=True,index_col='Year-Month')
+df.head()
+
+# Plotting TS data
+rcParams['figure.figsize'] = 15,8
+df.plot(grid=True);
+
+# Splitting Train & Test data
+train = df[df.index<'1957'] 
+test = df[df.index>'1957']
+
+### Single Exponential Smoothening
+
+# In Single ES, the forecast at time (t + 1) is given by Winters,1960
+# 𝐹𝑡+1=𝛼𝑌𝑡+(1−𝛼)𝐹𝑡
+
+# create class
+model_SES = SimpleExpSmoothing(train,initialization_method='estimated')
+
+# Fitting the Simple Exponential Smoothing model and asking python to choose the optimal parameters
+model_SES_autofit = model_SES.fit(optimized=True)
+
+# Let us check the parameters
+model_SES_autofit.params
+
+# Using the fitted model on the training set to forecast on the test set
+SES_predict = model_SES_autofit.forecast(steps=len(test))
+SES_predict
+
+# Plotting the Training data, Test data and the forecasted values
+
+plt.plot(train, label='Train')
+plt.plot(test, label='Test')
+
+plt.plot(SES_predict, label='Alpha =0.99 Simple Exponential Smoothing predictions on Test Set')
+
+plt.legend(loc='best')
+plt.grid()
+plt.title('Alpha = 0.99 Predictions');
+
+# Mean Absolute Percentage Error (MAPE) - Function Definition
+def MAPE(y_true, y_pred):
+    return np.mean((np.abs(y_true-y_pred))/(y_true))*100
+	
+print('SES RMSE:',mean_squared_error(test.values,SES_predict.values,squared=False))
+#different ways to calculate RMSE
+print('SES RMSE (calculated using statsmodels):',em.rmse(test.values,SES_predict.values)[0])
+
+### Double Exponential Smoothening
+
+# Initializing the Double Exponential Smoothing Model
+model_DES = Holt(train,initialization_method='estimated')
+
+# Fitting the model
+model_DES = model_DES.fit()
+
+# Let us check the parameters
+print(model_DES.params)
+
+# Using the fitted model on the training set to forecast on the test set
+DES_predict =  model_DES.forecast(len(test))
+DES_predict
+
+# Plotting the Training data, Test data and the forecasted values
+
+plt.plot(train, label='Train')
+plt.plot(test, label='Test')
+
+plt.plot(SES_predict, label='Alpha=0.99:Simple Exponential Smoothing predictions on Test Set')
+plt.plot(DES_predict, label='Alpha=0.099,Beta=0.0001:Double Exponential Smoothing predictions on Test Set')
+
+plt.legend(loc='best')
+plt.grid()
+plt.title('Simple and Double Exponential Smoothing Predictions');
+
+# RMSE Calculation
+print('DES RMSE:',mean_squared_error(test.values,DES_predict.values,squared=False))
+
+### Triple Exponential Smoothening with additive errors
+
+# Initializing the Double Exponential Smoothing Model
+model_TES = ExponentialSmoothing(train,trend='additive',seasonal='additive',initialization_method='estimated')
+
+# Fitting the model
+model_TES = model_TES.fit()
+
+# Let us check the parameters
+print(model_TES.params)
+
+# Forecasting using this model for the duration of the test set
+TES_predict =  model_TES.forecast(len(test))
+TES_predict
+
+# Plotting the Training data, Test data and the forecasted values
+
+plt.plot(train, label='Train')
+plt.plot(test, label='Test')
+
+plt.plot(SES_predict, label='Alpha=1:Simple Exponential Smoothing predictions on Test Set')
+plt.plot(DES_predict, label='Alpha=0.99,Beta=0.001:Double Exponential Smoothing predictions on Test Set')
+plt.plot(TES_predict, label='Alpha=0.25,Beta=0.0,Gamma=0.74:Triple Exponential Smoothing predictions on Test Set')
+
+plt.legend(loc='best')
+plt.grid()
+plt.title('Simple,Double and Triple Exponential Smoothing Predictions');
+
+# RMSE Calculation
+print('TES RMSE:',mean_squared_error(test.values,TES_predict.values,squared=False))
+
+
+
+
+

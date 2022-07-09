@@ -1,0 +1,308 @@
+ARIMA - Hands-On
+----------------
+
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from matplotlib import pyplot as plt
+import matplotlib
+import sklearn
+import statsmodels
+
+# Loading data to DF
+df = pd.read_csv('Sales_quantity.csv')
+df.head()
+
+# Start range is given as 2015-01-01 so we create time stamp colmn and add it to DF
+Time_Stamp = pd.date_range(start='2015-01-01',periods=len(df),freq='M')
+df['Time_Stamp'] = Time_Stamp
+df.head()
+
+# Informing pandas tat DF is a Time Series data and use Time_Stamp as index
+df.set_index(keys='Time_Stamp',inplace=True)
+
+# The following code is to set the subsequent figure sizes
+from pylab import rcParams
+rcParams['figure.figsize'] = 20,8
+
+# Plot the Time Series to understand the behaviour of the data.
+df.plot(grid=True);
+
+# Decompose the Time Series and plot the different components
+from statsmodels.tsa.seasonal import   seasonal_decompose
+decomposition = seasonal_decompose(df,model='additive')
+decomposition.plot();
+
+# We see that the residuals have a pattern in this decomposition. So we will check multiplicative
+
+decomposition = seasonal_decompose(df,model='multiplicative')
+decomposition.plot();
+
+# For the multiplicative series, we see that a lot of residuals are located around 1. So this is the currect way.
+
+# Check for stationarity of the whole Time Series data.
+from statsmodels.tsa.stattools import adfuller
+
+dftest = adfuller(df,regression='ct')
+print('DF test statistic is %3.3f' %dftest[0])
+print('DF test p-value is' ,dftest[1])
+print('Number of lags used' ,dftest[2])
+
+# we get p-value 0.31 which is greater than 0.05(5% confidence level), So we cannot reject Null Hypothesis.
+# So current TS is not stationary.
+
+# So take 1 level of difference an test for stationary.
+dftest = adfuller(df.diff().dropna(),regression='ct')
+print('DF test statistic is %3.3f' %dftest[0])
+print('DF test p-value is' ,dftest[1])
+print('Number of lags used' ,dftest[2])
+
+# Here we get p-value as 9.130e-14 which is less than 0.05 so we can reject Null Hypothesis . 
+# So current TS with 1 level of difference is stationary.
+
+# Plotting this stationary series.
+df.diff().dropna().plot(grid=True);
+
+## For an ARIMA model we need to find p,d,q values
+
+## d -> level of differencing required on given TS to get Stationary TS. {In this example d = 1}
+## q -> Moving Avg Term. ACF plot gives this value. Excluding lag-0 (first line) starting from 
+       lag-1 we count the number of continuous lines outside the shaded region {In this example q = 3}
+	   We account this till 12 lags if the lines beyond 12 are continuously outside the shaded region we take q = 0.
+## p -> PACF plot gives this value. Excluding lag-0 (first line) starting from 
+       lag-1 we count the number of continuous lines outside the shaded region(direction doesn't matter) {In this example p = 1}
+	   We account this till 12 lags if the lines beyond 12 are continuously outside the shaded region we take p = 0.
+	   
+# Plot the Autocorrelation and the Partial Autocorrelation function plots on the whole data.
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+plot_acf(df,alpha=0.05);
+
+plot_pacf(df,zero=False,alpha=0.05); # or
+plot_pacf(df,zero=False,alpha=0.05,method='ywmle');
+
+# Split the data into train and test and plot the training and test data.
+# Training Data is till the end of 2018. Test Data is from the beginning of 2019 to the last time stamp provided.
+train = df[df.index<='2019'] 
+test = df[df.index>'2019']
+
+print(train.shape)
+print(test.shape)
+
+train.plot(grid=True);
+
+# Check Stationarity of Train data
+dftest = adfuller(train,regression='ct')
+print('DF test statistic is %3.3f' %dftest[0])
+print('DF test p-value is' ,dftest[1])
+print('Number of lags used' ,dftest[2])
+
+# p-value is greater than 0.05 so not stationary. We will check at difference level = 1 
+
+dftest = adfuller(train.diff().dropna(),regression='ct')
+print('DF test statistic is %3.3f' %dftest[0])
+print('DF test p-value is' ,dftest[1])
+print('Number of lags used' ,dftest[2])
+
+# p-value is less than 0.05, so Train date with difference level (d = 1) is stationary.
+
+train.diff().dropna().plot(grid=True);
+
+-----------------------------------------------------------------------------------
+
+## Brute Force way to find values for p & q given d = 1
+
+# The following loop helps us in getting a combination of different parameters of p and q in the range of 0 and 4
+# We have kept the value of d as 1 as we need to take a difference of the series to make it stationary.
+import itertools
+p = q = range(0, 4)
+d= range(1,2) # Here d will always be 1
+pdq = list(itertools.product(p, d, q))
+print('Examples of the parameter combinations for the Model')
+for i in range(0,len(pdq)):
+    print('Model: {}'.format(pdq[i]))
+	
+# Creating an empty Dataframe with column names only
+ARIMA_AIC = pd.DataFrame(columns=['param', 'AIC'])
+ARIMA_AIC
+
+from statsmodels.tsa.arima.model import ARIMA
+
+for param in pdq:# running a loop within the pdq parameters defined by itertools
+	#fitting the ARIMA model using the parameters from the loop
+    ARIMA_model = ARIMA(train['Sales_quantity'].values,order=param).fit()
+	
+	#printing the parameters and the AIC from the fitted models
+    print('ARIMA{} - AIC:{}'.format(param,ARIMA_model.aic))
+	
+	#appending the AIC values and the model parameters to the previously created data frame
+    #for easier understanding and sorting of the AIC values
+    ARIMA_AIC = ARIMA_AIC.append({'param':param, 'AIC': ARIMA_model.aic}, ignore_index=True)
+	
+# Sort the above AIC values in the ascending order to get the parameters for the minimum AIC value
+ARIMA_AIC.sort_values(by='AIC',ascending=True).head()
+
+# Create the model with best values of p,q,d
+auto_ARIMA = ARIMA(train, order=(2,1,2))
+results_auto_ARIMA = auto_ARIMA.fit()
+print(results_auto_ARIMA.summary())
+    
+results_auto_ARIMA.plot_diagnostics();
+
+# Predict on the Test Set using this model and evaluate the model.
+predicted_auto_ARIMA = results_auto_ARIMA.forecast(steps=len(test))
+
+## Mean Absolute Percentage Error (MAPE) - Function Definition
+def mean_absolute_percentage_error(y_true, y_pred):
+    return np.mean((np.abs(y_true-y_pred))/(y_true))*100
+
+## Importing the mean_squared_error function from sklearn to calculate the RMSE
+from sklearn.metrics import mean_squared_error
+
+rmse = mean_squared_error(test['Sales_quantity'],predicted_auto_ARIMA,squared=False)
+mape = mean_absolute_percentage_error(test['Sales_quantity'],predicted_auto_ARIMA)
+print('RMSE:',rmse,'\nMAPE:',mape)
+
+--------------------------------------------------------------------------------------
+## Manual Approach to find p & q values
+
+# Build a version of the ARIMA model for which the best parameters are selected by looking at the ACF and the PACF plots.
+plot_acf(train.diff(),title='Training Data Autocorrelation',missing='drop')
+plot_pacf(train.diff().dropna(),title='Training Data Partial Autocorrelation',zero=False,method='ywmle')
+plt.show()
+
+# {From the plots q = 3 & p = 3} so we take p,d,q as 3,1,3 model
+manual_ARIMA = ARIMA(train['Sales_quantity'], order=(3,1,3),freq='M')
+results_manual_ARIMA = manual_ARIMA.fit()
+print(results_manual_ARIMA.summary())
+
+results_manual_ARIMA.plot_diagnostics();
+
+# Predict on the Test Set using this model and evaluate the model.
+predicted_manual_ARIMA = results_manual_ARIMA.forecast(steps=len(test))
+rmse = mean_squared_error(test['Sales_quantity'],predicted_manual_ARIMA,squared=False)
+mape = mean_absolute_percentage_error(test['Sales_quantity'],predicted_manual_ARIMA)
+print('RMSE:',rmse,'\nMAPE:',mape)
+
+---------------------------------------------------------------------------------------
+##  Build an Automated version of a SARIMA model for which the best parameters are selected in 
+##  accordance with the lowest Akaike Information Criteria (AIC).
+
+# Let us look at the ACF plot once more to understand the seasonal parameter for the SARIMA model.
+plot_acf(train.diff(),title='Training Data Autocorrelation',missing='drop');
+
+# From the plot every '3'rd term is significant. So seasonality factor is '3' and all its multiples.
+
+# Here we proceed with Seasonality Factor as '6'
+
+## Brute force Approach to find values of p,d,q and P,D,Q
+
+import itertools
+p = q = range(0, 4)
+d= range(1,2)
+D = range(0,1)
+pdq = list(itertools.product(p, d, q))
+PDQ = [(x[0], x[1], x[2], 6) for x in list(itertools.product(p, D, q))]
+print('Examples of the parameter combinations for the Model are')
+for i in range(1,len(pdq)):
+    print('Model: {}{}'.format(pdq[i], PDQ[i]))
+	
+SARIMA_AIC = pd.DataFrame(columns=['param','seasonal', 'AIC'])
+SARIMA_AIC
+
+import statsmodels.api as sm
+
+for param in pdq:
+    for param_seasonal in PDQ:
+        SARIMA_model = sm.tsa.statespace.SARIMAX(train['Sales_quantity'].values,
+                                            order=param,
+                                            seasonal_order=param_seasonal,
+                                            enforce_stationarity=False,
+                                            enforce_invertibility=False)
+            
+        results_SARIMA = SARIMA_model.fit(maxiter=1000)
+        print('SARIMA{}x{} - AIC:{}'.format(param, param_seasonal, results_SARIMA.aic))
+        SARIMA_AIC = SARIMA_AIC.append({'param':param,'seasonal':param_seasonal ,'AIC': results_SARIMA.aic}, ignore_index=True)
+		
+SARIMA_AIC.sort_values(by=['AIC']).head()
+
+# Using best values for p,d,q & P,D,Q we create model
+import statsmodels.api as sm
+auto_SARIMA = sm.tsa.statespace.SARIMAX(train['Sales_quantity'],
+                                order=(1, 1, 3),
+                                seasonal_order=(3, 0, 3, 6),
+                                enforce_stationarity=False,
+                                enforce_invertibility=False)
+results_auto_SARIMA = auto_SARIMA.fit(maxiter=1000)
+print(results_auto_SARIMA.summary())
+
+results_auto_SARIMA.plot_diagnostics();
+
+# Predict on the Test Set using this model and evaluate the model.
+predicted_auto_SARIMA = results_auto_SARIMA.get_forecast(steps=len(test))
+predicted_auto_SARIMA.summary_frame(alpha=0.05).head()
+
+rmse = mean_squared_error(test['Sales_quantity'],predicted_auto_SARIMA.predicted_mean,squared=False)
+mape = mean_absolute_percentage_error(test['Sales_quantity'],predicted_auto_SARIMA.predicted_mean)
+print('RMSE:',rmse,'\nMAPE:',mape)
+
+---------------------------------------------------------------------------
+
+## Manual Approach
+
+# In this case we have seasonal factor as 3 or 6(both values are ok)
+
+Note : Significant legs means lines outside the shaded region.
+
+## Q -> ACF plot gives this value. Every nth term which is signifcant in seasonal format gives the value.
+## P -> PACF plot gives this value. Every nth term which is signifcant in seasonal format gives the value.
+
+# Every 3rd lag in ACF was significant and seasonal in nature so Q = 3
+# In PACF plot there is no significant term repeating in seasonal way , So P = 0
+# {Q = 3 and P = 0}
+
+
+import statsmodels.api as sm
+manual_SARIMA = sm.tsa.statespace.SARIMAX(train['Sales_quantity'],
+                                order=(3,1,3),
+                                seasonal_order=(0, 0, 3, 6),
+                                enforce_stationarity=False,
+                                enforce_invertibility=False)
+results_manual_SARIMA = manual_SARIMA.fit(maxiter=1000)
+print(results_manual_SARIMA.summary())
+
+results_manual_SARIMA.plot_diagnostics()
+plt.show()
+
+predicted_manual_SARIMA = results_manual_SARIMA.get_forecast(steps=len(test))
+
+rmse = mean_squared_error(test['Sales_quantity'],predicted_manual_SARIMA.predicted_mean,squared=False)
+mape = mean_absolute_percentage_error(test['Sales_quantity'],predicted_manual_SARIMA.predicted_mean)
+print('RMSE:',rmse,'\nMAPE:',mape)
+
+-----------------------------------------------------------------------
+
+## Now using the best model Do Forecast for entire data
+
+full_data_model = sm.tsa.statespace.SARIMAX(df['Sales_quantity'],
+                                order=(1,1,3),
+                                seasonal_order=(3, 0, 3, 6),
+                                enforce_stationarity=False,
+                                enforce_invertibility=False)
+results_full_data_model = full_data_model.fit(maxiter=1000)
+print(results_full_data_model.summary())
+
+# Doing forecast for next 20 months
+predicted_manual_SARIMA_full_data = results_full_data_model.get_forecast(steps=20)
+pred_full_manual_SARIMA_date = predicted_manual_SARIMA_full_data.summary_frame(alpha=0.05)
+pred_full_manual_SARIMA_date.head()
+
+rmse = mean_squared_error(df['Sales_quantity'],results_full_data_model.fittedvalues,squared=False)
+print('RMSE of the Full Model',rmse)
+
+axis = df['Sales_quantity'].plot(label='Observed')
+pred_full_manual_SARIMA_date['mean'].plot(ax=axis, label='Forecast', alpha=0.7)
+
+axis.set_xlabel('Year-Months')
+axis.set_ylabel('Sales_quantity')
+plt.legend(loc='best')
+plt.grid();
