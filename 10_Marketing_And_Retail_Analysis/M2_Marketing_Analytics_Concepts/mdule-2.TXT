@@ -1,0 +1,224 @@
+Churn Rate Prediction:
+
+Technique used: Logistic regression.
+
+
+Regression Equation:
+
+y = c + a1x1 + a2x2 + a3x3 + .....
+
+consider c + a1x1 + a2x2 + a3x3 + ..... as a utility function.
+
+The value of this utility fuction varies from -infinity to +infinity.
+
+To get these range from 0 to 1 i.e probability values in logistic regression we use following formula.
+
+(e power - utility / 1 + e power + utility)
+
+------------------------------------------------------------------------------------------------------------
+KNIME Work flow: Logistic Regression Model
+
+(file: Practice_ship)
+1) Excel Reader
+2) Number to String
+	Target variable 'survived' is of integer type we need to convert it into String type.
+3) Partitioning (To split data into Test & Training data)
+	To split data into 70:30
+	Select Relative Split
+	Select Draw Randomly
+
+	Two outputs are available
+		1) First Partition (Training Set)
+		2) Second Partition (Testing Set)
+
+	Random Seed can be used to get same output across different systems (equalent to randomstate parameter)
+4) Logistic Regression Learner (For Training the model)
+	First Partition to be connected here.
+		Select target column as 'survived'
+		select reference category value as '0' (to get output for 1)
+		select solver as 'Iteratively Reweighted least squares'
+		Select columns required for model building.
+
+	Gives 2 Outputs
+		1) Coefficients and statistics
+		2) Model Statistics (not so important)
+5) Logistic Regression Predictor (For prediction)
+	Second Partition to be connected here.
+	Connect square o/p of learner to square I/p of predictor.
+	Append columns with predicted probabilities (enable check-box), also give column new name.
+6)Scorer
+	First columns -> Actual o/p 'survived'
+	Second column  -> Predicted o/p 'Prediction(survived)'
+
+	It has Two Outputs:
+		1) Confusion Matrix (Alternate option view confusion Matrix -> Displays with percentages)
+
+------------------------------------------------------------------------------------------------------------
+KNIME Work flow: Decision Tree
+
+(file: Practice_ship)
+1) Excel Reader
+2) Number to String
+3) Partitioning
+4) Decision Tree Learner
+	select class column as target variable i.e 'survived'
+	** can also set other pruning parameters as required.
+5) Decision Tree Predictor
+	view decision tree
+6) Scorer
+	First columns -> Actual o/p 'survived'
+	Second column  -> Predicted o/p 'Prediction(survived)'
+
+	It has Two Outputs:
+		1) Confusion Matrix (Alternate option view confusion Matrix -> Displays with percentages)
+------------------------------------------------------------------------------------------------------------
+KNIME Work flow: Random Forest
+
+(file: Practice_ship)
+1) Excel Reader
+2) Number to String
+3) Partitioning
+4) Random Forest Learner
+	target column i.e 'survived'
+	Use Columns for model building (select required colmns)
+	Split Criterion : Information Gain Ratio
+5) Random Forest Predictor
+	view decision tree
+6) Scorer
+------------------------------------------------------------------------------------------------------------
+KNIME Work flow: Customer Churn Rates
+(File: Customer_data_Test & Customer_data_Train)
+(Here we already have seperate data for Train & Test)
+
+1) Excel Reader (for Train data) + Number to String (For Retained column)
+2) Excel Reader (for Test data) + Number to String (For Retained column)
+3) Logistic Regression Learner (I/P from Train-data Excel Reader)
+	Select target column as 'retained'
+	select reference category value as '0' (to get output for 1)
+	select solver as 'Iteratively Reweighted least squares'
+	Select columns required for model building.
+4) Logistic Regression Predictor (I/P from Test-data Excel Reader)
+	Connect square o/p of learner to square I/p of predictor.
+5) Scorer
+------------------------------------------------------------------------------------------------------------
+
+After building the Logistic Regression Model.
+
+Get the Coefficients for all Independent variable used in model building.
+Get the Std Error for all Independent variable used in model building.
+Compute 'Wald Statistic' -> (coeff / std error) ^ 2
+Variable with highest Wald Statistic is the one which contributes more in model building. (Model Accuracy)
+
+------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+Market Basket Analysis
+
+Out of previous transactions we give recommendations like preople who bought Set A ( 1 or more items) also bough set B(1 or more items)
+Ex: People buying Mobiles also bought Mobile cases in this ex setA is Mobile & Mobile cases is set B
+
+3 Metrices
+1) Support Metric -> set A / total baskests
+2) Confidence Metric -> set A & set B / set A
+3) Lift Metric- > (set A & set B / set A) / (set B / Total baskests) or (Confidence) / (Support of Set B)
+
+-------------------------------------------
+KNIME Work flow: Market Basket Analysis
+
+(File : Transactional Data)
+
+1) Excel Reader
+2) Cell Splitter
+	Select column to split -> 'Billing_sets'
+	Enter the delimiter -> ' ' (in this case its a blank space)
+	O/P required in 'set' format.
+3) Association Rule Learner
+	Set support to 0.005
+	Minimum Confidence to 0.4
+
+	In O/P
+	Items column represent : set A and consequent represent : set B
+
+(File: masterdata has details about product name & price for given product numbers in Transactional Data)
+
+4) Excel Reader -> for reading product details excel
+5) Joiner -> to combine both data
+	Clk on Add Row
+		'Consequent' in first column, 'Product Number_Text_format' in 2nd column,
+	Under column selection tab
+		Have all columns from 1st table and have only price and product_name from 2nd table
+6)Column Rename
+	Double clk on columns u intend to rename then rename colmn name
+		Consequent -> Rec_Prod_Num
+		Price -> Rec_Prod_Price
+		Product_Name -> Rec_Prod_Name
+7) Ungroup
+	Select 'items' column for ungrouping
+	Un check 'Remove selected collection column'
+
+	In Output -->  each I/P row creates 'n' number of O/P rows where 'n' is length of items{if 3 product num were present as set in items colmn we get 3 rows in O/P}
+8) Joiner -> to combine masterdata excel and ungroup output
+	Clk on Add Row
+		'items(#1)' in first column, 'Product Number_Text_format' in 2nd column,
+	Under column selection tab
+		Have all columns from 1st table and have only price and product_name from 2nd table
+9) GroupBy
+	Under Groups Tab
+		Select 'items' which is of st type & Rec_Prod_Num colmns for grouping
+	Under Manual Aggregation tab
+		Support, Confidence, lift as Mean
+		Implie as First (Its a dummy colmn)
+		items(#1) as concat
+		Rec_Prod_Price as mean
+		Rec_Prod_Num as First
+		Price as sum
+		Product_name as concat
+
+	Column Naming -> Keep Original Naming
+6)Column Rename
+	Double clk on columns u intend to rename then rename colmn name
+		Product_name -> Basket_Product_Name
+		Price -> Basket_Price
+		items(#1) -> Basket_Item_Num
+--------------------- Rules are defined and built Now we will Verify ---------------------------
+(File: NewItems)
+7) Excel Reader
+8) GroupBy
+	Under Groups Tab
+		Select 'BasketNo' colmn for grouping
+	Under Manual Aggregation tab
+		items as conact
+
+	Column Naming -> Keep Original Naming
+9) Cell Splitter
+	Select column to split -> 'items'
+	Enter the delimiter -> ',' (in this case its a blank space)
+	O/P required in 'set' format.
+10) Subset Matcher -> Basically does the job of look up
+	It takes 2 I/P
+		1) Pass O/P of 9)Cell Splitter
+		2) Pass O/P of 6)Column Rename
+
+	Subset Column -> Items colmn of set type
+	ID Column -> BasketNo
+
+	Output
+		It tells for each transaction / rule recommended sets
+11) Joiner -> to combine O/P of 10) Subset Matcher & 6)Column Rename
+	Clk on Add Row
+	'items' of set type in first column, 'items' of set type in 2nd column,
+-----------------------------------------------------------
+
+For a same basket of Products we might have multiple recommendations i.e multiple rules may be present,
+--> Preferred rule is the one with highest lift i.e recommendation is the rec_prod with the highest lift value.
+------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
+Customer Lifetime Value
+
+Measure of how valuable a customer is to the business.
+Based on transactions over a period(lifetime).
+
+CLV = Short Term Margin * Long Term Multiplier
+Short Term Margin -> Net Margin - Retention Cost
+Long Term Multiplier -> (1 + d) / (1 + d - r)
+d -> discount factor
+r -> retention rate

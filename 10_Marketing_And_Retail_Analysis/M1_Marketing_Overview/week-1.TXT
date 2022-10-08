@@ -1,0 +1,46 @@
+Knime - Work flow:
+
+1. Excel Reader
+2. Row filter
+	- Have rows only with country UK.
+3. Row filter
+	- Remove rows with null entries.
+4. Math Formulae
+	- Recency -> tdy date - invoice date
+5. Math Formulae
+	- Monetary -> unit price * Quantity
+- Frequency -> Unique count of invoices for each customer
+6. Group By
+	- Groups - use CustomerId colmn to group by
+	- Manual Aggregation - How remaining columns to be merged?
+	- For recency use 'minimum' condition for aggregation.
+- Segmentation
+	- 555 111 or HHH LLL
+	- 0 - 25 percentile -> L
+	- 25 - 50 percentile -> M
+	- 75+ percentile -> H
+7. Auto Binner
+	- Only For RFM columns
+	- 3 bins (Bin 1, Bin 2, Bin 3)
+8. Cell Replacer + Table Creater (For Monetary)
+	Bin 1 -> L
+	Bin 2 -> M
+	Bin 3 -> H
+9. Cell Replacer + Table Creater (For Frequency)
+	Bin 1 -> L
+	Bin 2 -> M
+	Bin 3 -> H
+10. Cell Replacer + Table Creater (For Recency)
+	Bin 1 -> H
+	Bin 2 -> M
+	Bin 3 -> L
+	
+---------------------------------------------------------------------------------------
+K - Means Clustering using Knime:
+
+1. Excel Reader
+2. K-Means
+	- Cluster O/P -> gives mean values of each cluster for selected columns.
+	- Labelled I/P -> All I/P along with column specifying cluster to which it belongs.
+3. Excel Writer.
+	

@@ -1,0 +1,58 @@
+Kinds of Risk:
+
+	Credit Risk -> Will People (borrowers) pay back ?
+	Market Risk -> Are prices going up or down ?
+	Liquidity Risk -> Will we have enough cash ?
+	Operational Risk -> Is anyone trying to rob thr bank?
+	Systemic Risk -> Will new regulations lead to harder times?
+
+
+--------------------------------------------------------------------
+Credit Risk:
+
+	Aspects of Credit Risk Regulators choose to focus on:
+
+		1) Probability of Default (PD)
+				- Chance of Non-Repayment.
+				- Number between 0 & 1.
+
+		2) Exposure at Default (EAD)
+				- When default happens, How much of Bank's money is at risk.
+				- Total of all defaults.
+				- It is in terms of rupees / dollers in respective curreny.
+
+		3) Loss Given Default (LGD)
+				- Once default has happened , Bank tries to recover it so how much of total amout it failed to recover.
+				- A person took a $100 home loan & defaulted. Bank sold the house @ $80 to recover loan.
+				- Here $100 - $80 = $20 , 20% is the LGD.
+
+--------------------------------------------------------------------
+Credit Risk Modeling:
+
+	1) Logistic Regression -> For finding PD 
+	2) Linear Regression -> Dor finding EAD
+--------------------------------------------------------------------
+Hands-On 
+	Refer Consumer IPYNB File
+--------------------------------------------------------------------
+Credit Risk Loss Distributions:
+
+	The overall loss distribution is similar to normal distribution.
+	Where mean's are treated as expected losses & UnExpected losses are treated as Std Deviation.
+	
+	For a given portfolio of 'n' size
+	
+	Expected Loss(EL) = Summation i = 1 to n (PD(i) * EAD(i) * LGD(*))
+	
+	Variance = (Summation i = 1 to n (ro(i) * sigma(i))) power of 2
+		
+		ro(i) -> Std Dev of ith element in portfolio
+		sigma(i) -> correlation b/w ith element & portfolio.
+
+	Unexpected Loss = Summation i = 1 to n (ro(i) * sigma(i))
+	
+	Worst Case Situation:
+		Value At Risk is a point which tells how much money can I loose. 
+		Value At Risk is a value banks should be prepared if things go wrong.
+
+

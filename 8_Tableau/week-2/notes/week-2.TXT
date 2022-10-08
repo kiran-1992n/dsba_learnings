@@ -1,0 +1,7 @@
+Pareto Chart:
+
+	- Used for a dimension which runs from 0 to Infinity.
+	- Not Negative values.
+	- Values will be displayed in decreasing order.
+	
+-------------------------------------------------------------

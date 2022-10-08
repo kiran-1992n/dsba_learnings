@@ -1,0 +1,37 @@
+Visual Analytics:
+
+	1) Understand Cognitive Perception
+	2) Eliminate Visual Clutter
+	3) Chose an appropriate display mechanism
+	4) Design dashboards
+	5) Explore Visually
+	6) Analyze Visually
+	7) Create Storyboards
+	
+-------------------------------------------------------------------------
+Numeric Variable  -> Measures (Continuous in nature)
+Catagorical / Date / Text variables -> Dimensions (Discrete in Nature)
+
+-------------------------------------------------------------------------
+Choosing Charts:
+
+	Single Measure & Single Dimension -> Bar chart
+	(Date) Dimension & (Sales)Measure -> Line Chart (Since Date is kind of continuity)
+	Between 2 Measures -> Scatter Plot
+	
+Line Chart:
+
+	- Gives the trend
+	- Evidence of Seasonality(If any)
+	- Data highs and lows
+	- Detect Outliers (If any)
+	- Find Noise
+	- Dates to be always place in columns
+	
+Scatter Plot:
+
+	- Independent Variable  -> X axis -> Columns
+	- Dependent Variable -> Y axis -> Rows
+	
+-------------------------------------------------------------------------
+	
